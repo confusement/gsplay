@@ -63,7 +63,6 @@
               "src/styles.css"
             ],
             "scripts": [
-              "./node_modules/codemirror/lib/codemirror.js"
             ]
           },
           "configurations": {

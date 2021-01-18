@@ -14,32 +14,55 @@
         <div id="menubar">
             <button mat-raised-button color="primary">Save</button>
             <button mat-raised-button>Load</button>
-            <button mat-raised-button>Generate Default</button>
+            <button mat-raised-button (click)="generate()">Generate Default</button>
         </div>
 
     </mat-toolbar>
     <div class='workingarea'>
         <div *ngIf="tabSelected==0" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
-            <textarea id="code1">{{code1}}
-            </textarea>
-            <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" id="error1" readonly>Error in Line 1</textarea>
+            <app-ngx-source-editor class="code1"></app-ngx-source-editor>
+            <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" class="error1" readonly>Error in Line 2</textarea>
         </div>
         <div *ngIf="tabSelected==1" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
-            <textarea id="code1">{{code2}}
-            </textarea>
-            <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" id="error1" readonly>Error in Line 2</textarea>
+            <app-ngx-source-editor class="code1"></app-ngx-source-editor>
+            <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" class="error1" readonly>Error in Line 2</textarea>
         </div>
         <div *ngIf="tabSelected==2" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div id="configBox">
-                <mat-card>
-                    <mat-card-title>Renderer Settings</mat-card-title>
-                    <mat-card-content>
-                        <span>Render resolution</span>
-                        <mat-slider thumbLabel [displayWith]="formatLabel" tickInterval="25" step="25" min="25" max="100" [(ngModel)] = "resFactor"></mat-slider>
-                        <span>{{resFactor}}</span>
-                    </mat-card-content>
-                </mat-card>
-
+                <div id="infobox">
+                    <mat-card style="height: 90%;padding: 0;">
+                        <mat-card-subtitle>Instructions</mat-card-subtitle>
+                        <mat-card-content>
+                        </mat-card-content>
+                    </mat-card>  
+                </div>
+                <div id="isettings">
+                    <mat-card>
+                        <mat-card-subtitle>Renderer Settings</mat-card-subtitle>
+                        <mat-card-content>
+                            <span class=".mat-small">Render resolution</span>
+                            <mat-slider color="primary" thumbLabel [displayWith]="formatLabel" tickInterval="25" step="25" min="25" max="100" [(ngModel)] = "resFactor"></mat-slider>
+                            <span>{{resFactor}}%</span>
+                            <br>
+                            <span class=".mat-small">Uniform Labels</span>
+                            <mat-form-field appearance="fill">
+                                <mat-label>select program name</mat-label>
+                                <mat-select [(ngModel)]="uniformType" name="uniformLabels">
+                                  <mat-option *ngFor="let label of uniformLabels" [value]="label">
+                                    {{label}}
+                                  </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+    
+                        </mat-card-content>
+                    </mat-card>
+                    <mat-card>
+                        <mat-card-subtitle>Editor Settings</mat-card-subtitle>
+                        <mat-card-content>
+    
+                        </mat-card-content>
+                    </mat-card>  
+                </div>
             </div>
         </div>
     </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit , ViewChild , ElementRef } from '@angular/core';
+import { Component, OnInit , ViewChild , ElementRef, AfterViewInit} from '@angular/core';
 import {
   trigger,
   state,
@@ -6,11 +6,13 @@ import {
   animate,
   transition,
 } from '@angular/animations';
+import * as CodeMirror from 'codemirror'
+import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-source-editor.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.html',
-  styleUrls: ['./app.css'],
+  styleUrls: ['./app.css','lib/codemirror.css'],
   animations: [
     trigger('fadeEditor', [
       state('open', style({opacity: 1,})),
@@ -45,6 +47,11 @@ import {
   ]
 })
 export class AppComponent   implements OnInit {
+  @ViewChild('code2') c1obj: any;
+  public ngAfterViewInit(): void
+  {
+
+  }
   title = 'gsplay';
   
   //Tab UI
@@ -54,6 +61,8 @@ export class AppComponent   implements OnInit {
   
   //Config UI
   public resFactor : number = 25;
+  public uniformType : String = "ShaderToy";
+
   formatLabel(value: number) {
     return value.toString() +'%';
   }
@@ -73,9 +82,9 @@ export class AppComponent   implements OnInit {
   public generate():void{
 
   }
-  constructor(private _elementRef : ElementRef) { 
+  constructor() { 
     this.ishud = true;
-    this.tabSelected = 0;
+    this.tabSelected = 1;
   }
   tabChanged(event : any) {
     this.tabSelected = event.index;
@@ -85,25 +94,26 @@ export class AppComponent   implements OnInit {
   onKeyDown(event: any) { 
     if(event.ctrlKey){
       console.log(event.key)
-      if(event.key=='Enter')
+      if(event.key==',')
       {
         event.preventDefault();
         console.log("toggle hud");
         this.ishud = !this.ishud;
       }
-      if(event.key=='i')
+      else if(event.key=='.')
+      {
+        event.preventDefault();
+        console.log("GGEZ");
+      }
+      else if(event.key=='i')
       {
         event.preventDefault();
         console.log("toggle hud");
         this.isConsole = !this.isConsole;
       }
     }
-    else if(event.altKey){
-      if(event.key=='Enter'){
-        console.log("GGEZ");
-      }
-    }
   }
+  public uniformLabels : String[] = ['ShaderToy','bonzomatic','simpleV2']
   public code1 : String = `One advanced diverted domestic sex repeated bringing you old. Possible procured her trifling laughter thoughts property she met way. Companions shy had solicitude favourable own. Which could saw guest man now heard but. Lasted my coming uneasy marked so should. Gravity letters it amongst herself dearest an windows by. Wooded ladies she basket season age her uneasy saw. Discourse unwilling am no described dejection incommode no listening of. Before nature his parish boy. 
 
   Folly words widow one dow   ns few age every seven. If miss part by fact he park just shew. Discovered had get considered projection who favourable. Necessary up knowledge it tolerably. Unwilling departure education is be dashwoods or an. Use off agreeable law unwilling sir deficient curiosity instantly. Easy mind life fact with see has bore ten. Parish any chatty can elinor direct for former. Up as meant widow equal an share least. 

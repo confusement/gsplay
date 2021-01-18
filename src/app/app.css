@@ -1,7 +1,7 @@
 .main{
     width: 100vw;
     height: 100vh;
-    background-image: url(./resources/images/rem.jpg);
+    background-image: url(./resources/images/cube.png);
     background-size: cover;
     display: flex;
     flex-direction: column;
@@ -38,14 +38,10 @@
 .titleText{
     font-size: medium;
 }
-#code1{
+.code1{
     flex-grow: 300;
-    font-size:large;
-    color: white;
-    padding: 20px;
-    background-color: rgba(1,1,1,0.8); 
 }
-#error1{
+.error1{
     flex-grow: 1;
     background-color: rgba(1,1,1,0.8);
     font-size:large;
@@ -55,14 +51,36 @@
 #configBox{
     height: 100%;
     padding: 20px;
+    margin-top: 0;
+    padding-top: 0;
     background-color:white;
     color: black;
     text-align: left;
     font-weight: 100;
     font-family: sans-serif;
+    display: flex;
+    flex-direction: row;
 }
-mat-slider{
-    width: 50vw;
+#settings{
+    flex: 1 1 0px;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: row;
+}
+#infobox{
+    flex: 1 1 0px;
+    height: 100%;
+    margin-right: 10px;
+    padding: 0px;
+    text-align: center;
+}
+mat-slider,mat-form-field{
     margin-left: 25px;
     margin-right: 25px;
+    width: 40vh;
+}
+mat-card{
+    flex: 1 1 0px;
+    margin-top: 25px;
+    margin-bottom: 25px;
 }

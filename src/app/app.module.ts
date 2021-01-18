@@ -4,7 +4,6 @@ import { NgModule } from '@angular/core';
 //Deafult modules
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { TestComponent } from './components/test/test.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 //Code Editor
@@ -20,15 +19,17 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatCardModule} from '@angular/material/card';
 import {MatSliderModule} from '@angular/material/slider';
+import {MatSelectModule} from '@angular/material/select';
 
 //My Components
 import { GwindowComponent } from './components/gwindow/gwindow.component';
+import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-source-editor.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TestComponent,
-    GwindowComponent
+    GwindowComponent,
+    NgxSourceEditorComponent,
   ],
   imports: [
     BrowserModule,
@@ -43,7 +44,8 @@ import { GwindowComponent } from './components/gwindow/gwindow.component';
     MatDialogModule,
     MatInputModule,
     MatCardModule,
-    MatSliderModule
+    MatSliderModule,
+    MatSelectModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

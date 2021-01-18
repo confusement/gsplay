@@ -21,7 +21,7 @@
     "@angular/platform-browser-dynamic": "~11.0.5",
     "@angular/router": "~11.0.5",
     "@ctrl/ngx-codemirror": "^4.1.0",
-    "@types/codemirror": "0.0.106",
+    "@types/codemirror": "^0.0.106",
     "@types/dat.gui": "^0.7.6",
     "@types/three": "^0.103.2",
     "codemirror": "^5.59.1",
@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1100.5",
-    "@angular/cli": "~11.0.5",
+    "@angular/cli": "^11.0.7",
     "@angular/compiler-cli": "~11.0.5",
     "@types/node": "^12.11.1",
     "ts-node": "~8.3.0",
