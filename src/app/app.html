@@ -1,0 +1,47 @@
+<div class='main' (window:keydown)="onKeyDown($event)">
+    <mat-toolbar mat-color='black' id="menu" [@hideMenu]="ishud ? 'open' : 'closed'">
+        
+        <mat-tab-group [selectedIndex]="tabSelected" (selectedTabChange)="tabChanged($event)">
+            <mat-tab label="First">
+            </mat-tab>
+            <mat-tab label="Second">
+            </mat-tab>
+            <mat-tab label="Third">
+            </mat-tab>
+        </mat-tab-group>
+        
+        <span class="titleText">gsplay - Untitled</span>
+        <div id="menubar">
+            <button mat-raised-button color="primary">Save</button>
+            <button mat-raised-button>Load</button>
+            <button mat-raised-button>Generate Default</button>
+        </div>
+
+    </mat-toolbar>
+    <div class='workingarea'>
+        <div *ngIf="tabSelected==0" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
+            <textarea id="code1">{{code1}}
+            </textarea>
+            <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" id="error1" readonly>Error in Line 1</textarea>
+        </div>
+        <div *ngIf="tabSelected==1" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
+            <textarea id="code1">{{code2}}
+            </textarea>
+            <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" id="error1" readonly>Error in Line 2</textarea>
+        </div>
+        <div *ngIf="tabSelected==2" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
+            <div id="configBox">
+                <mat-card>
+                    <mat-card-title>Renderer Settings</mat-card-title>
+                    <mat-card-content>
+                        <span>Render resolution</span>
+                        <mat-slider thumbLabel [displayWith]="formatLabel" tickInterval="25" step="25" min="25" max="100" [(ngModel)] = "resFactor"></mat-slider>
+                        <span>{{resFactor}}</span>
+                    </mat-card-content>
+                </mat-card>
+
+            </div>
+        </div>
+    </div>
+</div>
+<router-outlet></router-outlet>

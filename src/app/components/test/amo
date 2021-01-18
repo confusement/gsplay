@@ -1,0 +1,41 @@
+class Solution {
+public:
+    vector<int> kmp1(string pat){
+        vector<int> ret(pat.size(),0);
+        for(int it=1;it<pat.size();it++){
+            int j = ret[it-1];
+            while(j>0 && pat[it]!=pat[j]) 
+                j=ret[j-1];
+            if(pat[it]==pat[j]) 
+                j++;
+            ret[it]=j;
+        }
+        return ret;
+    }
+    typedef struct node{
+        char val;
+        node *child[26];
+    } node;
+    
+    vector<int> findSubstring(string s, vector<string>& words) {
+        vector<int> ans;
+        node head;
+        for(auto i:words){
+            node * cur = &head;
+            for(auto j:i)
+            {
+                if(cur->child[j-'a']==NULL)
+                {
+                    node neue;
+                    neue.val = j;
+                    cur->child[j-'a'] = &neue;
+                    cur = &neue;
+                }
+                else{
+                    cur = cur->child[j-'a'];
+                }
+            }
+        }
+    return ans;
+    }
+};

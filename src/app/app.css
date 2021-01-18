@@ -1,0 +1,68 @@
+.main{
+    width: 100vw;
+    height: 100vh;
+    background-image: url(./resources/images/rem.jpg);
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+.workingarea{
+    width: 100%;
+    flex: 1;
+}
+#innerdiv{
+    /* border: 2px solid gray; */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+#menu{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 55px;
+}
+:host ::ng-deep .mat-tab-label {
+    min-width: 20px;
+}
+#menubar{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+.mat-raised-button{
+    margin-left: 4px;
+    margin-right: 4px;
+}
+.titleText{
+    font-size: medium;
+}
+#code1{
+    flex-grow: 300;
+    font-size:large;
+    color: white;
+    padding: 20px;
+    background-color: rgba(1,1,1,0.8); 
+}
+#error1{
+    flex-grow: 1;
+    background-color: rgba(1,1,1,0.8);
+    font-size:large;
+    color: white;
+    padding: 20px; 
+}
+#configBox{
+    height: 100%;
+    padding: 20px;
+    background-color:white;
+    color: black;
+    text-align: left;
+    font-weight: 100;
+    font-family: sans-serif;
+}
+mat-slider{
+    width: 50vw;
+    margin-left: 25px;
+    margin-right: 25px;
+}
