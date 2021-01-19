@@ -1,6 +1,12 @@
 <div class="contain">
-    <div class="labels" wrap="off" readonly #label (scroll)="code.scrollTop = label.scrollTop">{{labels}}</div>
-    <div class="code" wrap="off" #code (scroll)="label.scrollTop = code.scrollTop" contenteditable="True">{{labels}}</div>   
+    <!-- <div class="labels" wrap="off" readonly #label (scroll)="code.scrollTop = label.scrollTop">{{labels}}</div> -->
+    <div class="code"  
+    (keydown)="onKeydown($event)" 
+    (paste)="onPaste($event)" contenteditable="True"
+    (input)="onInput($event)"
+    #code
+    ></div>   
 </div>
 
 <!-- [ngModel]="code" (ngModelChange)="updateLabels($event)" -->
+<!-- #code (scroll)="label.scrollTop = code.scrollTop" -->
