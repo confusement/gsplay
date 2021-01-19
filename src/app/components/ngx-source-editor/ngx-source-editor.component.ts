@@ -11,11 +11,12 @@ export class NgxSourceEditorComponent implements OnInit {
   public content : String = "HAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\n";
   public labels : String = "";
   @ViewChild("code") editorElem :any;
+  @ViewChild("label") editorLabel :any;
   ngAfterViewInit() :void{
     console.log(this.editorElem);
   }
   ngOnInit(): void {
-    for(var i:number =0;i<37;i++)
+    for(var i:number =0;i<50;i++)
     { 
       this.labels += i.toString() + '<br>';
     }

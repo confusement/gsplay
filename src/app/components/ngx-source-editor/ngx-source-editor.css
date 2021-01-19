@@ -4,6 +4,8 @@
     position:relative;
 }
 .code {
+    padding-top: 0.5em;
+    padding-left: 2.5em;
     position:absolute;
     background-color: rgba(1, 1, 1, 0.8);
     color: white;
@@ -14,21 +16,26 @@
     white-space: nowrap;
     max-height: inherit;
     overflow: auto;
+    box-sizing:border-box
     /* white-space: pre; */
 }
 .code:focus {
     outline: none !important;
 }
 .labels{
-    background-color: rgba(1, 1, 1, 0.8);
+    padding-top: 0.5em;
+    position:absolute;
+    background-color: rgba(1, 1, 1, 0.2);
     height: 100%;
     color: white;
     resize: none;
     text-align: center;
     font-size: large !important;
     user-select: none;  
-    padding-left: 1em;
-    padding-right: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    box-sizing:border-box;
+    overflow-y: auto;
 }
 .labels::-webkit-scrollbar {
     width: 0px;  
