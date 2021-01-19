@@ -1,1 +1,6 @@
-<textarea class="code" wrap="off"></textarea>
+<div class="contain">
+    <div class="labels" wrap="off" readonly #label (scroll)="code.scrollTop = label.scrollTop">{{labels}}</div>
+    <div class="code" wrap="off" #code (scroll)="label.scrollTop = code.scrollTop" contenteditable="True">{{labels}}</div>   
+</div>
+
+<!-- [ngModel]="code" (ngModelChange)="updateLabels($event)" -->

@@ -8,8 +8,17 @@ import { Component, OnInit } from '@angular/core';
 export class NgxSourceEditorComponent implements OnInit {
 
   constructor() { }
-
+  public code : String = "HAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\n";
+  public labels : String = "";
   ngOnInit(): void {
+    for(var i:number =0;i<37;i++)
+    {
+      this.labels += i.toString() + ' ';
+    }
+    
+  }
+  public updateLabels(event : any) :void{
+
   }
 
 }

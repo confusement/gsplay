@@ -1,17 +1,42 @@
+.contain{
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+.labels{
+    flex: 0 0 1em;
+    background-color: rgba(1, 1, 1, 0.8);
+    height: 100%;
+    color: white;
+    resize: none;
+    overflow-x:hidden;
+    overflow-y: auto;
+    text-align: center;
+    font-size: large !important;
+    user-select: none;  
+    padding-left: 1em;
+    padding-right: 1em;
+}
+.labels::-webkit-scrollbar {
+    width: 0px;  
+    background: transparent; 
+}
+.labels::-webkit-scrollbar-thumb {
+    background: #FF0000;
+}
 .code {
     background-color: rgba(1, 1, 1, 0.8);
-    font-size: large;
     color: white;
-    margin: 0;
-    padding: 10px;
-    box-sizing: border-box;
     width: 100%;
-    height: 100%;
     resize: none;
-    overflow: auto;
-    line-height: 1
+    font-size: large !important;
+    overflow: scroll;
+    white-space: nowrap;
+    /* white-space: pre; */
 }
-
+/* resize: none;
+overflow: hidden;
+line-height: 1, */
 .code:focus {
     outline: none !important;
 }
