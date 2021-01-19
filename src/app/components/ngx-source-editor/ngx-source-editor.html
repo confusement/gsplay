@@ -1,11 +1,10 @@
 <div class="contain">
     <div class="labels" [innerHTML]="labels" #label (scroll)="code.scrollTop = label.scrollTop"></div>
     <div class="code"  
-    (keydown)="onKeydown($event)" 
     (paste)="onPaste($event)" contenteditable="True"
-    (input)="onInput($event)"
     #code
     (scroll)="label.scrollTop = code.scrollTop"
+    (keydown)="onKeydown($event)"
     ></div>   
 </div>
 <!-- (scroll)="code.scrollTop = label.scrollTop" -->

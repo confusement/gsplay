@@ -11,7 +11,7 @@
         </mat-tab-group>
         
         <span class="titleText">gsplay - Untitled</span>
-        <div id="menubar">
+        <div id="menubar"  #code2>
             <button mat-raised-button color="primary">Save</button>
             <button mat-raised-button>Load</button>
             <button mat-raised-button (click)="generate()">Generate Default</button>
@@ -20,7 +20,7 @@
     </mat-toolbar>
     <div class='workingarea'>
         <div *ngIf="tabSelected==0" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
-            <app-ngx-source-editor class="code1"></app-ngx-source-editor>
+            <app-ngx-source-editor #code1 class="code1"></app-ngx-source-editor>
             <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" class="error1" readonly>Error in Line 2</textarea>
         </div>
         <div *ngIf="tabSelected==1" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">

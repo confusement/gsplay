@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild , AfterViewInit} from '@angular/core';
+import { Component, OnInit, ViewChild , AfterViewInit, ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-ngx-source-editor',
@@ -6,27 +6,55 @@ import { Component, OnInit, ViewChild , AfterViewInit} from '@angular/core';
   styleUrls: ['ngx-source-editor.css']
 })
 export class NgxSourceEditorComponent implements OnInit {
-
-  constructor() { }
-  public content : String = "HAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\nHAHAHA\n";
-  public labels : String = "";
+  static NUM_WHITESPACES : number = 8;
+  constructor(private cdRef:ChangeDetectorRef) { }
+  public content : string = 
+`void main(){
+\t\t\t\t\t\t\t\tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+\t\t\t\t\t\t\t\tgl_FragColor=vec4(vec3(uv.r,uv.g,0.)+.5,1.0);
+}`;
+  public labels : string = "0";
+  public numLines :number = 1;
   @ViewChild("code") editorElem :any;
   @ViewChild("label") editorLabel :any;
   ngAfterViewInit() :void{
-    console.log(this.editorElem);
+    this.setCode(this.content);
+  }
+  public setCode(prog:string):void{
+    this.editorElem.innerHTML = "";
+    this.editorElem.nativeElement.focus();
+    document.execCommand('inserttext', false, prog);
+  }
+  public getCode():void{
+    let program :string =  (this.editorElem.nativeElement.innerHTML).toString();
+
+    let numLines = (program.match(/<div>/gi) || []).length + 1;
+    if(numLines>this.numLines)
+    {
+      this.numLines = numLines;
+      this.updateLabels();
+    }
+    program = program.replace(/(<\/div>)|(&nbsp;)/gi,'');
+    program = program.replace(/(<div>)|(<br>)/gi,'\n');
   }
   ngOnInit(): void {
-    for(var i:number =0;i<50;i++)
+
+  }
+  public onKeydown(event :any):void{
+    if(event.which==9){
+      event.preventDefault();
+      document.execCommand('inserttext', false, "        ");
+    }
+  }
+  public updateLabels() :void{
+    this.labels = "";
+    for(var i:number =0;i<this.numLines;i++)
     { 
       this.labels += i.toString() + '<br>';
     }
-    
-  }
-  public updateLabels(event : any) :void{
-
+    this.cdRef.detectChanges();
   }
   public onInput(event:any):void{
-    console.log(this.editorElem.nativeElement.innerHTML);  
   }
   public onPaste(event :any):void{
     let clipboardData = event.clipboardData;
@@ -34,14 +62,6 @@ export class NgxSourceEditorComponent implements OnInit {
     clipboardData.setData('text', pastedText);
     event.preventDefault();
     document.execCommand('inserttext', false, pastedText);
-    // console.log(this.content);
-  }
-  public onKeydown(event :any):void{
-    if(event.ctrlKey){
-      if(event.key==','){
-        
-      }
-    }
   }
 
 }
