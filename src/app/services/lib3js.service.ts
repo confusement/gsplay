@@ -110,7 +110,7 @@ void main() {
 \t\tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
 \t\tvec3 col = vec3(0.);
 \t\tuv *= 3.;
-\t\tcol.r = fract(uv.x+iTime*.01);
+\t\tcol.r = smoothstep(0.8,0.9,fract(uv.x));
 \t\tgl_FragColor=vec4(col,1.0);
 }`
 }

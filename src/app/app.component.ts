@@ -6,10 +6,8 @@ import {
   style,
   animate,
   transition,
-} from '@angular/animations';
-import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-source-editor.component';
+} from '@angular/animations'
 import { Lib3jsService } from 'src/app/services/lib3js.service';
-
 @Component({
   selector: 'app-root',
   templateUrl: 'app.html',
@@ -36,8 +34,8 @@ import { Lib3jsService } from 'src/app/services/lib3js.service';
       ]),
     ]),
     trigger('toggleConsole', [
-      state('open', style({'flex-grow' : 100})),
-      state('closed', style({'flex-grow' : 1})),
+      state('open', style({height : "60vh"})),
+      state('closed', style({height : "80vh"})),
       transition('open => closed', [
         animate('0.25s')
       ]),
@@ -62,12 +60,26 @@ export class AppComponent   implements OnInit {
 
   //Renderer Vars
   public tStart : number;
-  @ViewChildren("code")
-  public code: any;
-  
+  // @ViewChildren("code")
+  // public code: any;
+  public content:string='';
   @ViewChild("canvas")
   public canvasRef:any;
 
+  //Code
+  prog1 : string = "let first : string = \"henlo\"";
+  prog2 : string = "let second : number;";
+  options = {
+    lineNumbers: true,
+    mode: 'text/typescript',
+  };
+  handleChange(event : string, numTab : number):void{
+    console.log(event);
+    if(numTab == 1)
+      this.prog1 = event;
+    else
+      this.prog2 = event;
+  }
   onResize(event:any):void {
     let canElement = this.canvasRef.nativeElement;
     canElement.height = canElement.clientHeight;
@@ -75,9 +87,12 @@ export class AppComponent   implements OnInit {
     this.lib3js.resizeRenderer(window.innerWidth,window.innerHeight);
   }
 
+  @ViewChildren('.') public codes: any;
   public ngAfterViewInit(): void
   {
-    this.code.first.setCode(this.lib3js.fs);
+    console.log(this.codes);
+    // this.code.first.setCode(this.lib3js.fs);
+    this.prog1 = this.lib3js.fs;
     let canElement = this.canvasRef.nativeElement;
     canElement.height = window.innerHeight;
     canElement.width = window.innerWidth;
@@ -103,11 +118,11 @@ export class AppComponent   implements OnInit {
 
   //Editor Buttons
   public save(): void{
-    let x = new Date();
-    console.log((x.getTime()-this.tStart)/1000);
+    console.log(this.prog1);
+
   }
   public load():void{
-    console.log(this.code.last.getCode());
+
   }
   public generate():void{
   }
@@ -128,7 +143,7 @@ export class AppComponent   implements OnInit {
       else if(event.key=='.')
       {
         event.preventDefault();
-        this.lib3js.setShader(this.code.first.getCode());
+        this.lib3js.setShader(this.prog1);
         this._snackBar.open("Program Recompiled", "dismiss", {
           duration: 2000,
         });

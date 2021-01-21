@@ -8,6 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 //Code Editor
 import { FormsModule } from '@angular/forms';
+import { CodemirrorModule } from '@ctrl/ngx-codemirror';
 
 // Angular Matrial Modules
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -49,7 +50,8 @@ import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-sou
     MatSliderModule,
     MatSelectModule,
     MatGridListModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    CodemirrorModule
   ],
   providers: [],
   bootstrap: [AppComponent]

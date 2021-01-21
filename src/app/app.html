@@ -21,12 +21,26 @@
     </mat-toolbar>
     <div class='workingarea'>
         <div *ngIf="tabSelected==0" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
-            <app-ngx-source-editor #code class="code1"></app-ngx-source-editor>
-            <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" class="error1" readonly>Error in Line 2</textarea>
+            <div class="ngx-codemirror">
+                <ngx-codemirror
+                    [options]="options"
+                    [ngModel]="prog1"
+                    [autoFocus]="true"
+                    (ngModelChange)="handleChange($event,1)"
+                ></ngx-codemirror>
+                </div>
+            <textarea class="error1" readonly>Everything good here yoooooo</textarea>
         </div>
         <div *ngIf="tabSelected==1" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
-            <app-ngx-source-editor #code class="code1"></app-ngx-source-editor>
-            <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" class="error1" readonly>Error in Line 2</textarea>
+            <div class="ngx-codemirror">
+                <ngx-codemirror
+                    [options]="options"
+                    [ngModel]="prog2"
+                    [autoFocus]="true"
+                    (ngModelChange)="handleChange($event,2)"
+                ></ngx-codemirror>
+                </div>
+            <textarea  class="error1" readonly>Everything good here too yoooooo</textarea>
         </div>
         <div *ngIf="tabSelected==2" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div id="configBox">
