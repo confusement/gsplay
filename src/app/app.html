@@ -1,4 +1,5 @@
-<div class='main' (window:keydown)="onKeyDown($event)">
+<div class='main' (window:keydown)="onKeyDown($event)" (window:resize)="onResize($event)">
+    <canvas id="canvas" #canvas></canvas>
     <mat-toolbar mat-color='black' id="menu" [@hideMenu]="ishud ? 'open' : 'closed'">
         
         <mat-tab-group [selectedIndex]="tabSelected" (selectedTabChange)="tabChanged($event)">
@@ -11,28 +12,38 @@
         </mat-tab-group>
         
         <span class="titleText">gsplay - Untitled</span>
-        <div id="menubar"  #code2>
-            <button mat-raised-button color="primary">Save</button>
-            <button mat-raised-button>Load</button>
+        <div id="menubar">
+            <button mat-raised-button color="primary" (click)="save()">Save</button>
+            <button mat-raised-button (click)="load()">Load</button>
             <button mat-raised-button (click)="generate()">Generate Default</button>
         </div>
 
     </mat-toolbar>
     <div class='workingarea'>
         <div *ngIf="tabSelected==0" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
-            <app-ngx-source-editor #code1 class="code1"></app-ngx-source-editor>
+            <app-ngx-source-editor #code class="code1"></app-ngx-source-editor>
             <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" class="error1" readonly>Error in Line 2</textarea>
         </div>
         <div *ngIf="tabSelected==1" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
-            <app-ngx-source-editor class="code1"></app-ngx-source-editor>
+            <app-ngx-source-editor #code class="code1"></app-ngx-source-editor>
             <textarea [@toggleConsole]="isConsole ? 'open' : 'closed'" class="error1" readonly>Error in Line 2</textarea>
         </div>
         <div *ngIf="tabSelected==2" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div id="configBox">
                 <div id="infobox">
                     <mat-card style="height: 90%;padding: 0;">
-                        <mat-card-subtitle>Instructions</mat-card-subtitle>
+                        <mat-card-subtitle style="padding-top: 20px;">Texture Settings</mat-card-subtitle>
                         <mat-card-content>
+                            <mat-grid-list cols="4" rowHeight="2:1">
+                                <mat-grid-tile>1</mat-grid-tile>
+                                <mat-grid-tile>2</mat-grid-tile>
+                                <mat-grid-tile>3</mat-grid-tile>
+                                <mat-grid-tile>4</mat-grid-tile>
+                                <mat-grid-tile>5</mat-grid-tile>
+                                <mat-grid-tile>6</mat-grid-tile>
+                                <mat-grid-tile>7</mat-grid-tile>
+                                <mat-grid-tile>8</mat-grid-tile>
+                            </mat-grid-list>
                         </mat-card-content>
                     </mat-card>  
                 </div>
@@ -59,7 +70,11 @@
                     <mat-card>
                         <mat-card-subtitle>Editor Settings</mat-card-subtitle>
                         <mat-card-content>
-    
+                        </mat-card-content>
+                    </mat-card> 
+                    <mat-card>
+                        <mat-card-content>
+                            <button mat-raised-button color="primary" (click)="save()">Apply Changes</button>
                         </mat-card-content>
                     </mat-card>  
                 </div>

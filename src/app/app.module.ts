@@ -20,6 +20,8 @@ import {MatDividerModule} from '@angular/material/divider';
 import {MatCardModule} from '@angular/material/card';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatSelectModule} from '@angular/material/select';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 //My Components
 import { GwindowComponent } from './components/gwindow/gwindow.component';
@@ -46,6 +48,8 @@ import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-sou
     MatCardModule,
     MatSliderModule,
     MatSelectModule,
+    MatGridListModule,
+    MatSnackBarModule
   ],
   providers: [],
   bootstrap: [AppComponent]

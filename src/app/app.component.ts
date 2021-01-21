@@ -1,4 +1,5 @@
 import { Component, OnInit , ViewChild , ElementRef, AfterViewInit , QueryList ,ViewChildren} from '@angular/core';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {
   trigger,
   state,
@@ -6,8 +7,8 @@ import {
   animate,
   transition,
 } from '@angular/animations';
-import * as CodeMirror from 'codemirror'
 import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-source-editor.component';
+import { Lib3jsService } from 'src/app/services/lib3js.service';
 
 @Component({
   selector: 'app-root',
@@ -47,45 +48,68 @@ import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-sou
   ]
 })
 export class AppComponent   implements OnInit {
-  @ViewChild('code1',{ static: false }) code1: any; 
-  public ngAfterViewInit(): void
-  {
-    // this.components.first.setCode('HelloWorld');
-    console.log(this.code1,"GGEZ");
-  }
+  //Default
   title = 'gsplay';
-  
+
   //Tab UI
   public ishud : boolean = true;
   public isConsole : boolean = false;
-  public tabSelected : number;
+  public tabSelected : number = 0;
   
   //Config UI
   public resFactor : number = 25;
   public uniformType : String = "ShaderToy";
 
-  formatLabel(value: number) {
-    return value.toString() +'%';
-  }
-  //Code Editor
+  //Renderer Vars
+  public tStart : number;
+  @ViewChildren("code")
+  public code: any;
+  
+  @ViewChild("canvas")
+  public canvasRef:any;
 
+  onResize(event:any):void {
+    let canElement = this.canvasRef.nativeElement;
+    canElement.height = canElement.clientHeight;
+    canElement.width =canElement.clientWidth;
+    this.lib3js.resizeRenderer(window.innerWidth,window.innerHeight);
+  }
+
+  public ngAfterViewInit(): void
+  {
+    this.code.first.setCode(this.lib3js.fs);
+    let canElement = this.canvasRef.nativeElement;
+    canElement.height = window.innerHeight;
+    canElement.width = window.innerWidth;
+    console.log(canElement.height,canElement.width,"viewInit Size");
+    this.lib3js.createRenderer(this.canvasRef);
+    this.Render();
+  } 
+  Render = () => {
+    // console.log("rendering");
+    requestAnimationFrame(this.Render);
+    this.lib3js.renderToCanvas(((new Date()).getTime()-this.tStart));
+  }
+  constructor(private lib3js : Lib3jsService,private _snackBar: MatSnackBar) { 
+    this.tStart = (new Date()).getTime();
+  }
   ngOnInit(){
 
   }
 
+  formatLabel(value: number) {
+    return value.toString() +'%';
+  }
+
   //Editor Buttons
   public save(): void{
-
+    let x = new Date();
+    console.log((x.getTime()-this.tStart)/1000);
   }
   public load():void{
-
+    console.log(this.code.last.getCode());
   }
   public generate():void{
-
-  }
-  constructor() { 
-    this.ishud = true;
-    this.tabSelected = 1;
   }
   tabChanged(event : any) {
     this.tabSelected = event.index;
@@ -104,6 +128,10 @@ export class AppComponent   implements OnInit {
       else if(event.key=='.')
       {
         event.preventDefault();
+        this.lib3js.setShader(this.code.first.getCode());
+        this._snackBar.open("Program Recompiled", "dismiss", {
+          duration: 2000,
+        });
         console.log("GGEZ");
       }
       else if(event.key=='i')

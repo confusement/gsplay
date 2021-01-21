@@ -21,21 +21,16 @@ export class NgxSourceEditorComponent implements OnInit {
     this.setCode(this.content);
   }
   public setCode(prog:string):void{
-    this.editorElem.innerHTML = "";
+    console.log(this.editorElem);
+    this.editorElem.nativeElement.innerHTML = "";
     this.editorElem.nativeElement.focus();
     document.execCommand('inserttext', false, prog);
   }
-  public getCode():void{
+  public getCode():string{
     let program :string =  (this.editorElem.nativeElement.innerHTML).toString();
-
-    let numLines = (program.match(/<div>/gi) || []).length + 1;
-    if(numLines>this.numLines)
-    {
-      this.numLines = numLines;
-      this.updateLabels();
-    }
     program = program.replace(/(<\/div>)|(&nbsp;)/gi,'');
     program = program.replace(/(<div>)|(<br>)/gi,'\n');
+    return program;
   }
   ngOnInit(): void {
 
@@ -43,8 +38,9 @@ export class NgxSourceEditorComponent implements OnInit {
   public onKeydown(event :any):void{
     if(event.which==9){
       event.preventDefault();
-      document.execCommand('inserttext', false, "        ");
+      document.execCommand('inserttext', false, "  ");
     }
+    console.log(event);
   }
   public updateLabels() :void{
     this.labels = "";
@@ -55,6 +51,13 @@ export class NgxSourceEditorComponent implements OnInit {
     this.cdRef.detectChanges();
   }
   public onInput(event:any):void{
+    let program :string =  (this.editorElem.nativeElement.innerHTML).toString();
+    let numLines = (program.match(/<div>/gi) || []).length + 1;
+    if(numLines>this.numLines)
+    {
+      this.numLines = numLines;
+      this.updateLabels();
+    }
   }
   public onPaste(event :any):void{
     let clipboardData = event.clipboardData;
