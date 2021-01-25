@@ -1,24 +1,9 @@
 <div class='main' (window:keydown)="onKeyDown($event)" (window:resize)="onResize($event)">
     <canvas id="canvas" #canvas></canvas>
-    <mat-toolbar mat-color='black' id="menu" [@hideMenu]="ishud ? 'open' : 'closed'">
-        
-        <mat-tab-group [selectedIndex]="tabSelected" (selectedTabChange)="tabChanged($event)">
-            <mat-tab label="First">
-            </mat-tab>
-            <mat-tab label="Second">
-            </mat-tab>
-            <mat-tab label="Third">
-            </mat-tab>
-        </mat-tab-group>
-        
-        <span class="titleText">gsplay - Untitled</span>
-        <div id="menubar">
-            <button mat-raised-button color="primary" (click)="save()">Save</button>
-            <button mat-raised-button (click)="load()">Load</button>
-            <button mat-raised-button (click)="generate()">Generate Default</button>
-        </div>
-
-    </mat-toolbar>
+    <!-- <div id="menu" [@hideMenu]="ishud ? 'open' : 'closed'">
+        <button mat-button>A</button>
+        <button mat-button>B</button>   
+    </div> -->
     <div class='workingarea'>
         <div *ngIf="tabSelected==0" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div class="ngx-codemirror">
@@ -28,9 +13,9 @@
                     [autoFocus]="true"
                     (ngModelChange)="handleChange($event,1)"
                 ></ngx-codemirror>
-                </div>
-            <textarea class="error1" readonly>Everything good here yoooooo</textarea>
+            </div>
         </div>
+        <textarea *ngIf="tabSelected==0" class="error1" readonly  [@toggleConsole]="errPause? 'open' : 'closed'">{{errMsg}}</textarea>
         <div *ngIf="tabSelected==1" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div class="ngx-codemirror">
                 <ngx-codemirror
@@ -40,9 +25,9 @@
                     (ngModelChange)="handleChange($event,2)"
                 ></ngx-codemirror>
                 </div>
-            <textarea  class="error1" readonly>Everything good here too yoooooo</textarea>
+            <textarea  class="error1" readonly>{{errMsg}}</textarea>
         </div>
-        <div *ngIf="tabSelected==2" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
+        <!-- <div *ngIf="tabSelected==2" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div id="configBox">
                 <div id="infobox">
                     <mat-card style="height: 90%;padding: 0;">
@@ -93,7 +78,7 @@
                     </mat-card>  
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 <router-outlet></router-outlet>

@@ -9,7 +9,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     overflow: hidden;
 } */
 .CodeMirror {
-    height: 80vh;
+    height: 100vh;
 }
 
 .labels::-webkit-scrollbar {
@@ -52,12 +52,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 */
 
 .cm-s-default.CodeMirror {
-    background-color: rgba(0, 0, 0, 0.527);
+    background-color: rgba(0, 0, 0, 0.75);
     color: #8F93A2;
   }
   
   .cm-s-default .CodeMirror-gutters {
-    background: #0f111a67;
+    background:rgba(0, 0, 0, 0.75);
     color: #464B5D;
     border: none;
   }

@@ -1,5 +1,6 @@
 import { Component, OnInit , ViewChild , ElementRef, AfterViewInit , QueryList ,ViewChildren} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import { interval } from 'rxjs';
 import {
   trigger,
   state,
@@ -24,8 +25,8 @@ import { Lib3jsService } from 'src/app/services/lib3js.service';
       ]),
     ]),
     trigger('hideMenu', [
-      state('open', style({transform: 'translateY(0%)'})),
-      state('closed', style({transform: 'translateY(-100%)'})),
+      state('open', style({transform: 'translateX(0%)'})),
+      state('closed', style({transform: 'translateX(-100%)'})),
       transition('open => closed', [
         animate('0.25s')
       ]),
@@ -34,8 +35,8 @@ import { Lib3jsService } from 'src/app/services/lib3js.service';
       ]),
     ]),
     trigger('toggleConsole', [
-      state('open', style({height : "60vh"})),
-      state('closed', style({height : "80vh"})),
+      state('open', style({transform: 'translateY(0%)'})),
+      state('closed', style({transform: 'translateY(110%)'})),
       transition('open => closed', [
         animate('0.25s')
       ]),
@@ -69,12 +70,13 @@ export class AppComponent   implements OnInit {
   //Code
   prog1 : string = "let first : string = \"henlo\"";
   prog2 : string = "let second : number;";
+  prog1_prev : string = "";
   options = {
     lineNumbers: true,
     mode: 'text/typescript',
   };
+  errPause : boolean = false;
   handleChange(event : string, numTab : number):void{
-    console.log(event);
     if(numTab == 1)
       this.prog1 = event;
     else
@@ -93,6 +95,7 @@ export class AppComponent   implements OnInit {
     console.log(this.codes);
     // this.code.first.setCode(this.lib3js.fs);
     this.prog1 = this.lib3js.fs;
+    this.prog2 = this.lib3js.initPass.fragmentShader;
     let canElement = this.canvasRef.nativeElement;
     canElement.height = window.innerHeight;
     canElement.width = window.innerWidth;
@@ -104,6 +107,33 @@ export class AppComponent   implements OnInit {
     // console.log("rendering");
     requestAnimationFrame(this.Render);
     this.lib3js.renderToCanvas(((new Date()).getTime()-this.tStart));
+    // console.log(this.lib3js.errorLog);
+    if(this.lib3js.errorLog.length>0)
+    {
+      let glErr:any = this.lib3js.errorLog[this.lib3js.errorLog.length-1];
+      // console.log(glErr);
+      if(glErr[0]=="THREE.WebGLProgram: shader error: "){
+        // this._snackBar.open("error occured", "dismiss", {
+        //   duration: 2000,
+        // });
+        let frommsg = glErr[7].split(/\r?\n/);
+        // console.log(frommsg)
+        let fullError = "";
+        let it = 1;
+        while(frommsg.length){
+          if(frommsg[it].substring(0,5)!="ERROR")
+            break;
+          fullError+= frommsg[it] + "\n";
+          it++;
+        }
+        this.errMsg = fullError;
+        this.lib3js.errorLog.pop();
+        this.errPause = true;
+        // this.prog1 += " ";
+      }
+      // if(glErr[:])
+      // console.log("Eror is ",(glErr as string).split(/\r?\n/)[1])
+    }
   }
   constructor(private lib3js : Lib3jsService,private _snackBar: MatSnackBar) { 
     this.tStart = (new Date()).getTime();
@@ -111,15 +141,24 @@ export class AppComponent   implements OnInit {
   ngOnInit(){
 
   }
-
+  public errMsg : string = "Everything good here too yoooooo";
+  sub = interval(1000).subscribe((val) => {
+    if(this.prog1_prev!=this.prog1)
+    {
+        this.lib3js.setShader(this.prog1,this.prog2);
+        this.errMsg = "All good yoooo";
+        this.prog1_prev = this.prog1;
+        this.errPause = false;
+    }
+    });
+  
   formatLabel(value: number) {
     return value.toString() +'%';
   }
 
   //Editor Buttons
   public save(): void{
-    console.log(this.prog1);
-
+    console.log(this.lib3js.errorLog);
   }
   public load():void{
 
@@ -132,28 +171,13 @@ export class AppComponent   implements OnInit {
   }
 
   onKeyDown(event: any) { 
-    if(event.ctrlKey){
+    if(event.altKey){
       console.log(event.key)
-      if(event.key==',')
+      if(event.key=='Enter')
       {
         event.preventDefault();
         console.log("toggle hud");
         this.ishud = !this.ishud;
-      }
-      else if(event.key=='.')
-      {
-        event.preventDefault();
-        this.lib3js.setShader(this.prog1);
-        this._snackBar.open("Program Recompiled", "dismiss", {
-          duration: 2000,
-        });
-        console.log("GGEZ");
-      }
-      else if(event.key=='i')
-      {
-        event.preventDefault();
-        console.log("toggle hud");
-        this.isConsole = !this.isConsole;
       }
     }
   }

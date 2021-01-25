@@ -2,6 +2,9 @@ import { Injectable, ElementRef } from '@angular/core';
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { CopyShader } from 'three/examples/jsm/shaders/CopyShader.js';
+
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import {BokehPass} from 'three/examples/jsm/postprocessing/BokehPass.js';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
@@ -19,9 +22,20 @@ export class Lib3jsService {
   public num_window :number;
   public config : lib3jsConfig;
   public threeVars : any = {};
+  public compVars : any = {};
+  public initPass : any = CopyShader;
+
+  public errorLog :any[] = []
   constructor() {
     this.num_window = 0;
     this.config = {isPost:true};
+
+    const errMethod = console.error;
+    console.error= (...args:any) => { 
+      this.errorLog.push(args);
+      errMethod(`safafafa`,...args)
+    }
+    Object.freeze(console)
   }
   public access () : void {
     console.log('accessed');
@@ -39,10 +53,13 @@ export class Lib3jsService {
     return geometry;
   }
   public createRenderer(canvas:ElementRef<HTMLCanvasElement>) :void{
+
     const renderer = new THREE.WebGLRenderer({canvas: canvas.nativeElement});
     let res_x = window.innerWidth;
     let res_y = window.innerHeight;
     renderer.setSize(res_x,res_y);
+    
+    //Other Things
     let geometry : THREE.Geometry = this.getBox();
     let uniforms = {
       iTime: {type:"f",value: 1.0},
@@ -58,7 +75,17 @@ export class Lib3jsService {
     let mesh : THREE.Mesh = new THREE.Mesh( geometry,material);
     scene.add(mesh);
     camera.position.z = 0;
-    this.threeVars = {"renderer":renderer,"scene":scene,"camera":camera,"material":material,"geometry":geometry,"mesh":mesh};
+    this.threeVars = {"renderer":renderer,"scene":scene,"camera":camera,"material":material,"mesh":mesh};
+
+    //Composer
+    const composer = new EffectComposer( renderer );
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(res_x,res_y),1.0,0.0,0.0);
+    const renderPass = new RenderPass( scene, camera );
+    composer.addPass( renderPass );
+    // composer.addPass(bloomPass);
+    const customPass = new ShaderPass( this.initPass );
+    this.compVars = {"composer":composer,"customPass":customPass};
+    console.log(CopyShader);
   }
   public resizeRenderer(width:number,height:number){
     this.threeVars.camera.aspect = width / height;
@@ -73,16 +100,18 @@ export class Lib3jsService {
     this.threeVars.material.uniforms.iResolution.value=res;
 
     this.threeVars.material.uniforms.iTime.value = time;
-    this.threeVars.renderer.render(this.threeVars.scene, this.threeVars.camera);
+    this.compVars.composer.render();
+    // this.threeVars.renderer.render(this.threeVars.scene, this.threeVars.camera);
   }
-  public setShader(code:string):boolean{
+  public setShader(code1:string,code2:string):boolean{
     let uniforms = {
       iTime: {type:"f",value: 1.0},
       iResolution:{type:"vec2",value:new THREE.Vector2(0,0)}
     }
+    
     let material : THREE.RawShaderMaterial =  new THREE.RawShaderMaterial({
       uniforms: uniforms,
-      fragmentShader: code,
+      fragmentShader: code1,
       vertexShader: this.vs,
     })
     this.threeVars.material = material;
@@ -107,10 +136,11 @@ uniform float iTime;
 uniform vec2 iResolution; 
 varying vec3 fragCoord;
 void main() {
-\t\tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
-\t\tvec3 col = vec3(0.);
-\t\tuv *= 3.;
-\t\tcol.r = smoothstep(0.8,0.9,fract(uv.x));
-\t\tgl_FragColor=vec4(col,1.0);
-}`
+\tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+\tvec3 col = vec3(0.);
+\tuv *= 3.;
+\tcol.r = smoothstep(0.8,0.9,fract(uv.x));
+\tgl_FragColor=vec4(col,1.0);
+}
+\n\n\n\n\n\n\n\n`
 }
