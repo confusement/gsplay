@@ -5,6 +5,11 @@
         <button mat-button>B</button>   
     </div> -->
     <div class='workingarea'>
+        <div id="showVars">
+            <div class="textDisplay">fps : {{printVars["fps"]}}</div>
+            <div class="textDisplay">time : {{printVars["time"]}}</div>
+            <div class="textDisplay">res_scale : {{state.resolutionScale}}</div>
+        </div>
         <div *ngIf="tabSelected==0" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div class="ngx-codemirror">
                 <ngx-codemirror
@@ -15,7 +20,7 @@
                 ></ngx-codemirror>
             </div>
         </div>
-        <textarea *ngIf="tabSelected==0" class="error1" readonly  [@toggleConsole]="errPause? 'open' : 'closed'">{{errMsg}}</textarea>
+        <textarea *ngIf="tabSelected==0" class="error1" readonly [@fadeEditor]="ishud ? 'open' : 'closed'" [@toggleConsole]="errPause? 'open' : 'closed'">{{errMsg}}</textarea>
         <div *ngIf="tabSelected==1" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div class="ngx-codemirror">
                 <ngx-codemirror
@@ -25,7 +30,7 @@
                     (ngModelChange)="handleChange($event,2)"
                 ></ngx-codemirror>
                 </div>
-            <textarea  class="error1" readonly>{{errMsg}}</textarea>
+            <textarea *ngIf="tabSelected==1"  class="error1" readonly>{{errMsg}}</textarea>
         </div>
         <!-- <div *ngIf="tabSelected==2" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div id="configBox">

@@ -2,7 +2,7 @@
 @import "~@angular/material/prebuilt-themes/indigo-pink.css"; 
 @import '~codemirror/lib/codemirror.css';
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0; font-family: Roboto, "Fira Sans", sans-serif; }
 /* .ngx-codemirror {
     border: 1px solid red;
     flex-grow: 300;
@@ -180,3 +180,24 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     text-decoration: underline;
     color: white !important;
   }
+
+  .mat-dialog-container{
+    background-color: rgba(0, 0, 0, 0.753);
+    color: white;
+  }
+@font-face {
+    font-family: SourceCodePro+Powerline+Awesome;
+    src: url("./app/fonts/SourceCodePro+Powerline+Awesome+Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: FiraMono-Bold;
+  src: url("./app/fonts/FiraMono-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: FiraMono-Medium;
+  src: url("./app/fonts/FiraMono-Medium.ttf") format("truetype");
+}
+@font-face {
+  font-family: FiraMono-Regular;
+  src: url("./app/fonts/FiraMono-Regular.ttf") format("truetype");
+}

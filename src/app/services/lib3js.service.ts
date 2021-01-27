@@ -135,12 +135,21 @@ export class Lib3jsService {
 uniform float iTime;
 uniform vec2 iResolution; 
 varying vec3 fragCoord;
-void main() {
-\tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
-\tvec3 col = vec3(0.);
-\tuv *= 3.;
-\tcol.r = smoothstep(0.8,0.9,fract(uv.x));
-\tgl_FragColor=vec4(col,1.0);
+vec3 image1(vec2 uv,vec2 center)
+{
+    vec3 col = vec3(0.0);
+    uv -= center;
+    uv *= 5.;
+    col.r += smoothstep(2.0,0.1,fract(length(uv)+iTime));
+    col.g += smoothstep(abs(sin(iTime))+0.5,0.1,fract(length(uv)+iTime));
+    col.b += sin(length(uv*abs(sin(iTime))))*.2;
+    return col;
 }
-\n\n\n\n\n\n\n\n`
+void main() {
+	vec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+    vec3 col = vec3(0.0);
+    col += image1(uv,vec2(0.,0.));
+	gl_FragColor=vec4(col*0.3,1.0);
+}
+`
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit , ViewChild , ElementRef, AfterViewInit , QueryList ,ViewChildren} from '@angular/core';
+import { Component, OnInit , ViewChild , ElementRef, AfterViewInit , QueryList ,ViewChildren, Inject} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { interval } from 'rxjs';
 import {
@@ -9,10 +9,20 @@ import {
   transition,
 } from '@angular/animations'
 import { Lib3jsService } from 'src/app/services/lib3js.service';
+
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+
+export interface appState {
+  resolutionScale : number;
+  editorSelection : number;
+  program1 : string;
+  program2 : string;
+}
+
 @Component({
   selector: 'app-root',
-  templateUrl: 'app.html',
-  styleUrls: ['./app.css','lib/codemirror.css'],
+  templateUrl: './templates/app.html',
+  styleUrls: ['./css/app.css','lib/codemirror.css'],
   animations: [
     trigger('fadeEditor', [
       state('open', style({opacity: 1,})),
@@ -60,13 +70,27 @@ export class AppComponent   implements OnInit {
   public uniformType : String = "ShaderToy";
 
   //Renderer Vars
-  public tStart : number;
+  public tStart : number = 0;
+  public lastFrame : number = 0;
   // @ViewChildren("code")
   // public code: any;
   public content:string='';
   @ViewChild("canvas")
   public canvasRef:any;
+  
+  //Debug Vars
+  public showVars:boolean=false;
+  public printVars:any = {fps:60,time:5289};
 
+  //Settings
+  public isConfigOpen : boolean = false;
+  public state : appState ={
+    resolutionScale : 1,
+    editorSelection:0,
+    program1:"",
+    program2:""
+  };
+  public dialogRef:any;
   //Code
   prog1 : string = "let first : string = \"henlo\"";
   prog2 : string = "let second : number;";
@@ -77,7 +101,7 @@ export class AppComponent   implements OnInit {
   };
   errPause : boolean = false;
   handleChange(event : string, numTab : number):void{
-    if(numTab == 1)
+    if(numTab == 1) 
       this.prog1 = event;
     else
       this.prog2 = event;
@@ -102,11 +126,20 @@ export class AppComponent   implements OnInit {
     console.log(canElement.height,canElement.width,"viewInit Size");
     this.lib3js.createRenderer(this.canvasRef);
     this.Render();
+
+    // this.toggleSettings();
   } 
   Render = () => {
     // console.log("rendering");
     requestAnimationFrame(this.Render);
-    this.lib3js.renderToCanvas(((new Date()).getTime()-this.tStart));
+    if(!this.errPause){
+      let pfNow = performance.now();
+      this.printVars.fps = (1000/(pfNow-this.lastFrame)).toFixed(1);
+      this.lastFrame = pfNow;
+      
+      this.printVars.time = ((pfNow-this.tStart)/1000).toFixed(1);
+      this.lib3js.renderToCanvas((pfNow-this.tStart)/1000);
+    }
     // console.log(this.lib3js.errorLog);
     if(this.lib3js.errorLog.length>0)
     {
@@ -135,8 +168,8 @@ export class AppComponent   implements OnInit {
       // console.log("Eror is ",(glErr as string).split(/\r?\n/)[1])
     }
   }
-  constructor(private lib3js : Lib3jsService,private _snackBar: MatSnackBar) { 
-    this.tStart = (new Date()).getTime();
+  constructor(private lib3js : Lib3jsService,private _snackBar: MatSnackBar,public dialog: MatDialog) { 
+
   }
   ngOnInit(){
 
@@ -149,6 +182,7 @@ export class AppComponent   implements OnInit {
         this.errMsg = "All good yoooo";
         this.prog1_prev = this.prog1;
         this.errPause = false;
+        this.tStart=performance.now();
     }
     });
   
@@ -171,19 +205,145 @@ export class AppComponent   implements OnInit {
   }
 
   onKeyDown(event: any) { 
-    if(event.altKey){
-      console.log(event.key)
-      if(event.key=='Enter')
+    if(event.ctrlKey){
+      // console.log(event.key);
+      if(event.key=='e')
       {
         event.preventDefault();
         console.log("toggle hud");
         this.ishud = !this.ishud;
       }
+      else if(event.key=='ArrowRight'){
+        if(this.tabSelected<1)
+          this.tabSelected++;
+      }
+      else if(event.key=='ArrowLeft'){
+        if(this.tabSelected>0)
+          this.tabSelected--;
+      }
+      console.log(event.key);
+    }
+    else if(event.key=='`'){
+      this.toggleSettings();
+      event.preventDefault();
+      console.log(this.dialogRef);
+    }
+  }
+  private toggleSettings(){
+    if(!this.isConfigOpen){
+      let copiedState = Object.assign({}, this.state);
+      copiedState.program1 = 'bxas';
+      this.dialogRef = this.dialog.open(settingsDialog, {
+        width: '85vw',
+        height: '85vh',
+        restoreFocus : true,
+        data: copiedState
+      });
+      this.dialogRef.afterClosed().subscribe((result:any) => {
+        console.log(result);
+        this.isConfigOpen = false;
+        this.validateResult(result);
+      });
+      this.isConfigOpen=true;
+    }
+    else{
+      this.dialogRef.close();
+      this.isConfigOpen = false;
+    }
+  }
+  private validateResult(result:any){
+    if(result){
+      this.state = result;
     }
   }
   public uniformLabels : String[] = ['ShaderToy','bonzomatic','simpleV2']
 }
 
+interface presets {
+    name : string;
+    desc : string;
+    code : string;
+}
+
+@Component({
+  selector: 'settings-dialog',
+  templateUrl: './templates/settings.html',
+  styleUrls: ['./css/settings.css'],
+})
+export class settingsDialog {
+  public preset1 : Array<presets> = [
+    {
+      name:"preset1",
+      desc:"desc",
+      code:"code1"
+    },    {
+      name:"preset2",
+      desc:"desc",
+      code:"code2"
+    },    {
+      name:"preset3",
+      desc:"desc",
+      code:"code3"
+    },    {
+      name:"preset4",
+      desc:"desc",
+      code:"code4"
+    },
+    {
+      name:"preset5",
+      desc:"desc",
+      code:"code5"
+    },
+    {
+      name:"preset6",
+      desc:"desc",
+      code:"code6"
+    },
+  ];
+  public preset2 : Array<presets> = [
+    {
+      name:"preset1",
+      desc:"desc",
+      code:"code1"
+    },    {
+      name:"preset2",
+      desc:"desc",
+      code:"code2"
+    },    {
+      name:"preset3",
+      desc:"desc",
+      code:"code3"
+    },    {
+      name:"preset4",
+      desc:"desc",
+      code:"code4"
+    },
+    {
+      name:"preset5",
+      desc:"desc",
+      code:"code5"
+    },
+    {
+      name:"preset6",
+      desc:"desc",
+      code:"code6"
+    },
+  ];
+  
+  constructor(
+    public dialogRef: MatDialogRef<settingsDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: appState) {}
+
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
+  setProg1(prog1 : string):void{
+    this.data.program1 = prog1;
+  }
+  setProg2(prog2 : string):void{
+    this.data.program2 = prog2;
+  }
+}
 
 // var glslKeywords = "attribute const uniform varying break continue " +
 // "do for while if else in out inout float int void bool true false " +

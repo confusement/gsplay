@@ -3,8 +3,9 @@ import { NgModule } from '@angular/core';
 
 //Deafult modules
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { AppComponent, settingsDialog } from './app.component';
+// import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 //Code Editor
 import { FormsModule } from '@angular/forms';
@@ -24,6 +25,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatListModule} from '@angular/material/list';
 
 //My Components
 import { GwindowComponent } from './components/gwindow/gwindow.component';
@@ -34,11 +36,13 @@ import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-sou
     AppComponent,
     GwindowComponent,
     NgxSourceEditorComponent,
+    settingsDialog
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    BrowserAnimationsModule,
+    // BrowserAnimationsModule,
+    NoopAnimationsModule,
     MatToolbarModule,
     MatIconModule,
     MatTabsModule,
@@ -53,7 +57,8 @@ import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-sou
     MatGridListModule,
     MatSnackBarModule,
     CodemirrorModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatListModule
   ],
   providers: [],
   bootstrap: [AppComponent]

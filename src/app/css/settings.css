@@ -1,0 +1,64 @@
+.mat-dialog-actions{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+.mat-dialog-title{
+    text-align: center;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+.mat-dialog-title{
+  font-family: "FiraMono-Regular";
+}
+.mat-card{
+  background-color: rgba(0, 0, 0, 0);
+  color: rgb(128, 128, 128);
+  border: 2px solid rgb(128, 128, 128);
+  border-radius: 10px;
+  font-family: "SourceCodePro+Powerline+Awesome";
+  margin: 10px;
+}
+.mat-dialog-container{
+  overflow: auto;
+  border-radius: 20px !important;
+}
+.mat-list-text, .mat-list-option, .mat-list-base, .mat-list-item{
+  color: rgb(128, 128, 128);
+}
+#presetList{
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+}
+mat-card-title{
+  margin-bottom: 20px;
+}
+.preset_blocks{
+  flex-grow: 1;
+  /* margin: 10px; */
+  /* margin-top: 20px; */
+}
+.mat-divider-vertical{
+  background-color: rgb(128,128,128);
+}
+.mat-list-single-selected-option{
+  background-color: rgba(194, 194, 194, 0.815);
+  color: black;
+}
+mat-selection-list{
+  height: 200px;
+  overflow: auto;
+}
+mat-label{
+  /* border: 2px solid rgb(128, 128, 128); */
+  color: rgb(128, 128, 128);
+}
