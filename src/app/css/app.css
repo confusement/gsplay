@@ -56,10 +56,10 @@
 }
 .error1{
     height: 20vh;
-    width: 80%;
+    width: 60%;
     position: absolute;
     bottom: 1%;
-    left: 10%;
+    left: 30%;
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
@@ -117,18 +117,38 @@ mat-grid-tile {
     background-color: rgb(219, 219, 219);
     color: rgb(31, 31, 31);
 }
-#showVars{
+#showinf{
     position: absolute;
-    right: 2vw;
-    top : 2vh;
+    /* right: 2vw; */
+    bottom : 0vh;
+    width: 100%;
     background-color: rgba(0, 0, 0, 0.75);
-    text-align: center;
-    vertical-align: center;
-    font-size: x-large;
-    margin: 5px;
-    padding: 5px;
-    border-radius: 20px;
+    /* text-align: center; */
+    /* vertical-align: center; */
+    font-size:large;
+    display: flex;
+    flex-direction: row;
+    justify-content:space-between;
+    align-items: center;
+    z-index: 5;
+}
+.controlbutton{
+    /* padding: 20px; */
+    display: inline;
+    cursor: pointer;
+    padding: 20px;
+}
+.controlbutton:hover{
+    color: black;
+    background-color: white;
+}
+.controlbutton:active{
+    color:black;
+    background-color: rgb(226, 175, 128);
 }
 .textDisplay{
-    margin: 20px;
+    margin: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: center;
 }

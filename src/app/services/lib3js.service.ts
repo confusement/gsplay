@@ -23,7 +23,7 @@ export class Lib3jsService {
   public config : lib3jsConfig;
   public threeVars : any = {};
   public compVars : any = {};
-  public initPass : any = CopyShader;
+  public copyTemplate : any = CopyShader;
 
   public errorLog :any[] = []
   constructor() {
@@ -33,7 +33,7 @@ export class Lib3jsService {
     const errMethod = console.error;
     console.error= (...args:any) => { 
       this.errorLog.push(args);
-      errMethod(`safafafa`,...args)
+      // errMethod(`safafafa`,...args)
     }
     Object.freeze(console)
   }
@@ -83,7 +83,7 @@ export class Lib3jsService {
     const renderPass = new RenderPass( scene, camera );
     composer.addPass( renderPass );
     // composer.addPass(bloomPass);
-    const customPass = new ShaderPass( this.initPass );
+    const customPass = new ShaderPass( this.copyTemplate );
     this.compVars = {"composer":composer,"customPass":customPass};
     console.log(CopyShader);
   }
@@ -116,8 +116,17 @@ export class Lib3jsService {
     })
     this.threeVars.material = material;
     this.threeVars.mesh.material = material;
-    // this.threeVars.mesh = new THREE.Mesh( this.threeVars.geometry,this.threeVars.material);
+    
+    // Set Post Process
+    this.copyTemplate.fragmentShader = code2;
+    const customPass = new ShaderPass(this.copyTemplate);
+    this.compVars.composer.removePass(this.compVars.customPass);
+    this.compVars.customPass = customPass;
+    this.compVars.composer.addPass(this.compVars.customPass);
     return true;
+  }
+  public getShaderCodes():Array<number>{
+    return [this.threeVars.material.id,this.compVars.customPass.material.id];
   }
   public vs:string =
 `  precision mediump float;
@@ -137,19 +146,19 @@ uniform vec2 iResolution;
 varying vec3 fragCoord;
 vec3 image1(vec2 uv,vec2 center)
 {
-    vec3 col = vec3(0.0);
-    uv -= center;
-    uv *= 5.;
-    col.r += smoothstep(2.0,0.1,fract(length(uv)+iTime));
-    col.g += smoothstep(abs(sin(iTime))+0.5,0.1,fract(length(uv)+iTime));
-    col.b += sin(length(uv*abs(sin(iTime))))*.2;
-    return col;
+\tvec3 col = vec3(0.0);
+\tuv -= center;
+\tuv *= 5.;
+\tcol.r += smoothstep(2.0,0.1,fract(length(uv)+iTime));
+\tcol.g += smoothstep(abs(sin(iTime))+0.5,0.1,fract(length(uv)+iTime));
+\tcol.b += sin(length(uv*abs(sin(iTime))))*.2;
+\treturn col;
 }
 void main() {
-	vec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
-    vec3 col = vec3(0.0);
-    col += image1(uv,vec2(0.,0.));
-	gl_FragColor=vec4(col*0.3,1.0);
+\tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+\tvec3 col = vec3(0.0);
+\tcol += image1(uv,vec2(0.,0.));
+\tgl_FragColor=vec4(col*0.3,1.0);
 }
 `
 }

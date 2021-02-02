@@ -1,6 +1,6 @@
 import { Component, OnInit , ViewChild , ElementRef, AfterViewInit , QueryList ,ViewChildren, Inject} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import { interval } from 'rxjs';
+import { from, interval } from 'rxjs';
 import {
   trigger,
   state,
@@ -11,6 +11,7 @@ import {
 import { Lib3jsService } from 'src/app/services/lib3js.service';
 
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { LocalStorageService } from './services/local-storage.service';
 
 export interface appState {
   resolutionScale : number;
@@ -45,8 +46,8 @@ export interface appState {
       ]),
     ]),
     trigger('toggleConsole', [
-      state('open', style({transform: 'translateY(0%)'})),
-      state('closed', style({transform: 'translateY(110%)'})),
+      state('open', style({opacity:1.0})),
+      state('closed', style({opacity:0.0})),
       transition('open => closed', [
         animate('0.25s')
       ]),
@@ -62,6 +63,7 @@ export class AppComponent   implements OnInit {
 
   //Tab UI
   public ishud : boolean = true;
+  public isDebuginfo : boolean = true;
   public isConsole : boolean = false;
   public tabSelected : number = 0;
   
@@ -69,6 +71,8 @@ export class AppComponent   implements OnInit {
   public resFactor : number = 25;
   public uniformType : String = "ShaderToy";
 
+  public userPause : boolean = false;
+  public singleFrameRendered : boolean = false;
   //Renderer Vars
   public tStart : number = 0;
   public lastFrame : number = 0;
@@ -95,9 +99,10 @@ export class AppComponent   implements OnInit {
   prog1 : string = "let first : string = \"henlo\"";
   prog2 : string = "let second : number;";
   prog1_prev : string = "";
+  prog2_prev : string = "";
   options = {
     lineNumbers: true,
-    mode: 'text/typescript',
+    mode: 'glsl',
   };
   errPause : boolean = false;
   handleChange(event : string, numTab : number):void{
@@ -112,14 +117,37 @@ export class AppComponent   implements OnInit {
     canElement.width =canElement.clientWidth;
     this.lib3js.resizeRenderer(window.innerWidth,window.innerHeight);
   }
-
+  private formatError(errString:string,numLines:number,numError:number) : string{
+    let errLine = errString.split(":");
+    let col  = parseInt(errLine[1]);
+    let row = parseInt(errLine[2]);
+    console.log(row,numLines,numError);
+    row = numLines - (numError - row);
+    return "ERROR :"+col.toString()+":"+row.toString()+":" + (errLine.slice(3,errLine.length)).join() + "\n";
+  }
   @ViewChildren('.') public codes: any;
   public ngAfterViewInit(): void
   {
     console.log(this.codes);
     // this.code.first.setCode(this.lib3js.fs);
-    this.prog1 = this.lib3js.fs;
-    this.prog2 = this.lib3js.initPass.fragmentShader;
+
+    let storageProg1 = this.local_storage.get('prog1');
+    let storageProg2 = this.local_storage.get('prog2');
+    console.log();
+    if(storageProg1 instanceof Object)
+    {
+      this.prog1 =   this.lib3js.fs;
+    }
+    else{
+      this.prog1 = storageProg1;
+    }
+    if(storageProg2 instanceof Object)
+    {
+      this.prog2 =  this.lib3js.copyTemplate.fragmentShader;
+    }
+    else{
+      this.prog2 = storageProg2;
+    }
     let canElement = this.canvasRef.nativeElement;
     canElement.height = window.innerHeight;
     canElement.width = window.innerWidth;
@@ -144,19 +172,29 @@ export class AppComponent   implements OnInit {
     if(this.lib3js.errorLog.length>0)
     {
       let glErr:any = this.lib3js.errorLog[this.lib3js.errorLog.length-1];
+      let codes = this.lib3js.getShaderCodes();
+
       // console.log(glErr);
       if(glErr[0]=="THREE.WebGLProgram: shader error: "){
         // this._snackBar.open("error occured", "dismiss", {
         //   duration: 2000,
         // });
+        // console.log(codes);
+        console.log(glErr)
+        console.log(glErr[2])
         let frommsg = glErr[7].split(/\r?\n/);
-        // console.log(frommsg)
+        let totalLinesCombined :number = parseInt(frommsg[frommsg.length-1]);
         let fullError = "";
         let it = 1;
         while(frommsg.length){
           if(frommsg[it].substring(0,5)!="ERROR")
             break;
-          fullError+= frommsg[it] + "\n";
+          if(this.tabSelected==0){
+            fullError+= this.formatError(frommsg[it],(this.prog1.match(/\n/g) || '').length + 1,totalLinesCombined);
+          }
+          else{
+            fullError+= this.formatError(frommsg[it],(this.prog2.match(/\n/g) || '').length + 1,totalLinesCombined);
+          }
           it++;
         }
         this.errMsg = fullError;
@@ -164,26 +202,33 @@ export class AppComponent   implements OnInit {
         this.errPause = true;
         // this.prog1 += " ";
       }
+      else{
+        this.lib3js.errorLog.pop();
+      }
       // if(glErr[:])
       // console.log("Eror is ",(glErr as string).split(/\r?\n/)[1])
     }
   }
-  constructor(private lib3js : Lib3jsService,private _snackBar: MatSnackBar,public dialog: MatDialog) { 
+  constructor(private lib3js : Lib3jsService,private _snackBar: MatSnackBar,public dialog: MatDialog,private local_storage : LocalStorageService) { 
 
   }
   ngOnInit(){
-
+    console.log(this.local_storage.get('prog1'));
   }
   public errMsg : string = "Everything good here too yoooooo";
   sub = interval(1000).subscribe((val) => {
-    if(this.prog1_prev!=this.prog1)
-    {
-        this.lib3js.setShader(this.prog1,this.prog2);
-        this.errMsg = "All good yoooo";
-        this.prog1_prev = this.prog1;
-        this.errPause = false;
-        this.tStart=performance.now();
-    }
+      if(this.prog1_prev!=this.prog1 || this.prog2_prev!=this.prog2)
+      {
+          console.log("GG")
+          this.local_storage.set('prog1',this.prog1);
+          this.local_storage.set('prog2',this.prog2);
+          this.lib3js.setShader(this.prog1,this.prog2);
+          this.errMsg = "All good yoooo";
+          this.prog1_prev = this.prog1;
+          this.prog2_prev = this.prog2;
+          this.errPause = false;
+          this.tStart=performance.now();
+      }
     });
   
   formatLabel(value: number) {
@@ -206,12 +251,26 @@ export class AppComponent   implements OnInit {
 
   onKeyDown(event: any) { 
     if(event.ctrlKey){
-      // console.log(event.key);
       if(event.key=='e')
       {
         event.preventDefault();
         console.log("toggle hud");
         this.ishud = !this.ishud;
+      }
+    }
+    
+    if(event.key=='`'){
+      this.toggleSettings();
+      event.preventDefault();
+      console.log(this.dialogRef);
+    }
+
+    if(event.altKey){
+      if(event.key=='e')
+      {
+        event.preventDefault();
+        console.log("toggle hud");
+        this.isDebuginfo = !this.isDebuginfo;
       }
       else if(event.key=='ArrowRight'){
         if(this.tabSelected<1)
@@ -221,12 +280,6 @@ export class AppComponent   implements OnInit {
         if(this.tabSelected>0)
           this.tabSelected--;
       }
-      console.log(event.key);
-    }
-    else if(event.key=='`'){
-      this.toggleSettings();
-      event.preventDefault();
-      console.log(this.dialogRef);
     }
   }
   private toggleSettings(){
