@@ -1,6 +1,20 @@
-import { Component, OnInit , ViewChild , ElementRef, AfterViewInit , QueryList ,ViewChildren, Inject} from '@angular/core';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import { from, interval } from 'rxjs';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  QueryList,
+  ViewChildren,
+  Inject
+} from '@angular/core';
+import {
+  MatSnackBar
+} from '@angular/material/snack-bar';
+import {
+  from,
+  interval
+} from 'rxjs';
 import {
   trigger,
   state,
@@ -8,26 +22,38 @@ import {
   animate,
   transition,
 } from '@angular/animations'
-import { Lib3jsService } from 'src/app/services/lib3js.service';
+import {
+  Lib3jsService
+} from 'src/app/services/lib3js.service';
 
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { LocalStorageService } from './services/local-storage.service';
+import {
+  MatDialog,
+  MatDialogRef,
+  MAT_DIALOG_DATA
+} from '@angular/material/dialog';
+import {
+  LocalStorageService
+} from './services/local-storage.service';
 
 export interface appState {
-  resolutionScale : number;
-  editorSelection : number;
-  program1 : string;
-  program2 : string;
+  resolutionScale: number;
+  editorSelection: number;
+  program1: string;
+  program2: string;
 }
-
+import * as THREE from 'three';
 @Component({
   selector: 'app-root',
   templateUrl: './templates/app.html',
-  styleUrls: ['./css/app.css','lib/codemirror.css'],
+  styleUrls: ['./css/app.css', 'lib/codemirror.css'],
   animations: [
     trigger('fadeEditor', [
-      state('open', style({opacity: 1,})),
-      state('closed', style({opacity: 0.0,})),
+      state('open', style({
+        opacity: 1,
+      })),
+      state('closed', style({
+        opacity: 0.0,
+      })),
       transition('open => closed', [
         animate('0.25s')
       ]),
@@ -36,8 +62,12 @@ export interface appState {
       ]),
     ]),
     trigger('hideMenu', [
-      state('open', style({transform: 'translateX(0%)'})),
-      state('closed', style({transform: 'translateX(-100%)'})),
+      state('open', style({
+        transform: 'translateX(0%)'
+      })),
+      state('closed', style({
+        transform: 'translateX(-100%)'
+      })),
       transition('open => closed', [
         animate('0.25s')
       ]),
@@ -46,8 +76,12 @@ export interface appState {
       ]),
     ]),
     trigger('toggleConsole', [
-      state('open', style({opacity:1.0})),
-      state('closed', style({opacity:0.0})),
+      state('open', style({
+        opacity: 1.0
+      })),
+      state('closed', style({
+        opacity: 0.0
+      })),
       transition('open => closed', [
         animate('0.25s')
       ]),
@@ -57,125 +91,126 @@ export interface appState {
     ]),
   ]
 })
-export class AppComponent   implements OnInit {
+export class AppComponent implements OnInit {
   //Default
   title = 'gsplay';
 
   //Tab UI
-  public ishud : boolean = true;
-  public isDebuginfo : boolean = true;
-  public isConsole : boolean = false;
-  public tabSelected : number = 0;
-  
-  //Config UI
-  public resFactor : number = 25;
-  public uniformType : String = "ShaderToy";
+  public ishud: boolean = true;
+  public isDebuginfo: boolean = true;
+  public isConsole: boolean = false;
+  public tabSelected: number = 0;
 
-  public userPause : boolean = false;
-  public singleFrameRendered : boolean = false;
+  //Config UI
+  public resFactor: number = 25;
+  public uniformType: String = "ShaderToy";
+
+  public pauseIcon: string = "pause";
+  public userPause: boolean = false;
+  public singleFrameRendered: boolean = false;
   //Renderer Vars
-  public tStart : number = 0;
-  public lastFrame : number = 0;
-  // @ViewChildren("code")
-  // public code: any;
-  public content:string='';
+  public tStart: number = 0;
+  public tPause: number = 0;
+  public lastFrame: number = 0;
+
+  public content: string = '';
   @ViewChild("canvas")
-  public canvasRef:any;
-  
+  public canvasRef: any;
+
   //Debug Vars
-  public showVars:boolean=false;
-  public printVars:any = {fps:60,time:5289};
+  public showVars: boolean = false;
+  public printVars: any = {
+    fps: 60,
+    time: 5289
+  };
 
   //Settings
-  public isConfigOpen : boolean = false;
-  public state : appState ={
-    resolutionScale : 1,
-    editorSelection:0,
-    program1:"",
-    program2:""
+  public isConfigOpen: boolean = false;
+  public state: appState = {
+    resolutionScale: 1,
+    editorSelection: 0,
+    program1: "",
+    program2: ""
   };
-  public dialogRef:any;
+  //Uniforms Code
+  public orbit2d : THREE.Vector3 = new THREE.Vector3(800,0,1);
+  public iMouse : THREE.Vector2 = new THREE.Vector2(0.0,0.0);
+  public dialogRef: any;
   //Code
-  prog1 : string = "let first : string = \"henlo\"";
-  prog2 : string = "let second : number;";
-  prog1_prev : string = "";
-  prog2_prev : string = "";
+  prog1: string = "let first : string = \"henlo\"";
+  prog2: string = "let second : number;";
+  prog1_prev: string = "";
+  prog2_prev: string = "";
   options = {
     lineNumbers: true,
     mode: 'glsl',
   };
-  errPause : boolean = false;
-  handleChange(event : string, numTab : number):void{
-    if(numTab == 1) 
+  errPause: boolean = false;
+  handleChange(event: string, numTab: number): void {
+    if (numTab == 1)
       this.prog1 = event;
     else
       this.prog2 = event;
   }
-  onResize(event:any):void {
+  onResize(event: any): void {
     let canElement = this.canvasRef.nativeElement;
     canElement.height = canElement.clientHeight;
-    canElement.width =canElement.clientWidth;
-    this.lib3js.resizeRenderer(window.innerWidth,window.innerHeight);
+    canElement.width = canElement.clientWidth;
+    this.lib3js.resizeRenderer(window.innerWidth, window.innerHeight);
   }
-  private formatError(errString:string,numLines:number,numError:number) : string{
+  private formatError(errString: string, numLines: number, numError: number): string {
     let errLine = errString.split(":");
-    let col  = parseInt(errLine[1]);
+    let col = parseInt(errLine[1]);
     let row = parseInt(errLine[2]);
-    console.log(row,numLines,numError);
+    console.log(row, numLines, numError);
     row = numLines - (numError - row);
-    return "ERROR :"+col.toString()+":"+row.toString()+":" + (errLine.slice(3,errLine.length)).join() + "\n";
+    return "ERROR :" + col.toString() + ":" + row.toString() + ":" + (errLine.slice(3, errLine.length)).join() + "\n";
   }
   @ViewChildren('.') public codes: any;
-  public ngAfterViewInit(): void
-  {
+  public ngAfterViewInit(): void {
     console.log(this.codes);
     // this.code.first.setCode(this.lib3js.fs);
 
     let storageProg1 = this.local_storage.get('prog1');
     let storageProg2 = this.local_storage.get('prog2');
     console.log();
-    if(storageProg1 instanceof Object)
-    {
-      this.prog1 =   this.lib3js.fs;
-    }
-    else{
+    if (storageProg1 instanceof Object) {
+      this.prog1 = this.lib3js.fs;
+    } else {
       this.prog1 = storageProg1;
     }
-    if(storageProg2 instanceof Object)
-    {
-      this.prog2 =  this.lib3js.copyTemplate.fragmentShader;
-    }
-    else{
+    if (storageProg2 instanceof Object) {
+      this.prog2 = this.lib3js.copyTemplate.fragmentShader;
+    } else {
       this.prog2 = storageProg2;
     }
     let canElement = this.canvasRef.nativeElement;
     canElement.height = window.innerHeight;
     canElement.width = window.innerWidth;
-    console.log(canElement.height,canElement.width,"viewInit Size");
+    console.log(canElement.height, canElement.width, "viewInit Size");
     this.lib3js.createRenderer(this.canvasRef);
     this.Render();
 
     // this.toggleSettings();
-  } 
+  }
   Render = () => {
     // console.log("rendering");
     requestAnimationFrame(this.Render);
-    if(!this.errPause){
+    // console.log(this.tStart);
+    if (!this.errPause && !(this.userPause && this.singleFrameRendered)) {
       let pfNow = performance.now();
-      this.printVars.fps = (1000/(pfNow-this.lastFrame)).toFixed(1);
+      this.printVars.fps = (1000 / (pfNow - this.lastFrame)).toFixed(1);
       this.lastFrame = pfNow;
-      
-      this.printVars.time = ((pfNow-this.tStart)/1000).toFixed(1);
-      this.lib3js.renderToCanvas((pfNow-this.tStart)/1000);
-    }
-    // console.log(this.lib3js.errorLog);
-    if(this.lib3js.errorLog.length>0)
-    {
-      let glErr:any = this.lib3js.errorLog[this.lib3js.errorLog.length-1];
-      let codes = this.lib3js.getShaderCodes();
 
-      // console.log(glErr);
-      if(glErr[0]=="THREE.WebGLProgram: shader error: "){
+      this.printVars.time = ((pfNow - this.tStart) / 1000).toFixed(1);
+      this.lib3js.renderToCanvas((pfNow - this.tStart) / 1000,this.iMouse,this.orbit2d);
+      this.singleFrameRendered = true;
+    }
+
+    if (this.lib3js.errorLog.length > 0) {
+      let glErr: any = this.lib3js.errorLog[this.lib3js.errorLog.length - 1];
+      let codes = this.lib3js.getShaderCodes();
+      if (glErr[0] == "THREE.WebGLProgram: shader error: ") {
         // this._snackBar.open("error occured", "dismiss", {
         //   duration: 2000,
         // });
@@ -183,139 +218,192 @@ export class AppComponent   implements OnInit {
         console.log(glErr)
         console.log(glErr[2])
         let frommsg = glErr[7].split(/\r?\n/);
-        let totalLinesCombined :number = parseInt(frommsg[frommsg.length-1]);
+        let totalLinesCombined: number = parseInt(frommsg[frommsg.length - 1]);
         let fullError = "";
         let it = 1;
-        while(frommsg.length){
-          if(frommsg[it].substring(0,5)!="ERROR")
+        while (frommsg.length) {
+          if (frommsg[it].substring(0, 5) != "ERROR")
             break;
-          if(this.tabSelected==0){
-            fullError+= this.formatError(frommsg[it],(this.prog1.match(/\n/g) || '').length + 1,totalLinesCombined);
-          }
-          else{
-            fullError+= this.formatError(frommsg[it],(this.prog2.match(/\n/g) || '').length + 1,totalLinesCombined);
+          if (this.tabSelected == 0) {
+            fullError += this.formatError(frommsg[it], (this.prog1.match(/\n/g) || '').length + 1, totalLinesCombined);
+          } else {
+            fullError += this.formatError(frommsg[it], (this.prog2.match(/\n/g) || '').length + 1, totalLinesCombined);
           }
           it++;
         }
         this.errMsg = fullError;
         this.lib3js.errorLog.pop();
         this.errPause = true;
-        // this.prog1 += " ";
-      }
-      else{
+      } else {
         this.lib3js.errorLog.pop();
       }
-      // if(glErr[:])
-      // console.log("Eror is ",(glErr as string).split(/\r?\n/)[1])
     }
   }
-  constructor(private lib3js : Lib3jsService,private _snackBar: MatSnackBar,public dialog: MatDialog,private local_storage : LocalStorageService) { 
+  constructor(private lib3js: Lib3jsService, private _snackBar: MatSnackBar, public dialog: MatDialog, private local_storage: LocalStorageService) {
 
   }
-  ngOnInit(){
-    console.log(this.local_storage.get('prog1'));
+  ngOnInit() {
+    // console.log(this.local_storage.get('prog1'));a
   }
-  public errMsg : string = "Everything good here too yoooooo";
+  public errMsg: string = "Everything good here too yoooooo";
   sub = interval(1000).subscribe((val) => {
-      if(this.prog1_prev!=this.prog1 || this.prog2_prev!=this.prog2)
-      {
-          console.log("GG")
-          this.local_storage.set('prog1',this.prog1);
-          this.local_storage.set('prog2',this.prog2);
-          this.lib3js.setShader(this.prog1,this.prog2);
-          this.errMsg = "All good yoooo";
-          this.prog1_prev = this.prog1;
-          this.prog2_prev = this.prog2;
-          this.errPause = false;
-          this.tStart=performance.now();
-      }
-    });
-  
+    if (this.prog1_prev != this.prog1 || this.prog2_prev != this.prog2) {
+      // console.log("GG")
+      this.local_storage.set('prog1', this.prog1);
+      this.local_storage.set('prog2', this.prog2);
+      this.lib3js.setShader(this.prog1, this.prog2);
+      this.errMsg = "All good yoooo";
+      this.prog1_prev = this.prog1;
+      this.prog2_prev = this.prog2;
+      this.errPause = false;
+      this.tStart = performance.now();
+      this.singleFrameRendered = false;
+    }
+  });
+
+  public pause():void{
+    if(this.pauseIcon=='pause')
+      this.pauseIcon = 'play_arrow';
+    else
+      this.pauseIcon = 'pause';
+    if(this.userPause){
+      this.tStart = performance.now() - (this.tPause - this.tStart);
+    }
+    else{
+      this.tPause = performance.now();
+    }
+    this.userPause = !this.userPause;
+  }
+  public restart():void{
+    if(this.userPause){
+      this.tPause = this.tStart;
+      this.printVars['time'] = 0;
+    }
+    else{
+      this.tStart = performance.now();  
+    }
+  }
+  public toggleCode():void{
+    this.ishud = !this.ishud;
+  }
   formatLabel(value: number) {
-    return value.toString() +'%';
+    return value.toString() + '%';
   }
 
   //Editor Buttons
-  public save(): void{
+  public save(): void {
     console.log(this.lib3js.errorLog);
   }
-  public load():void{
+  public load(): void {
 
   }
-  public generate():void{
-  }
-  tabChanged(event : any) {
+  public generate(): void {}
+  tabChanged(event: any) {
     this.tabSelected = event.index;
     console.log(event.index);
   }
+  onMouseMove(event:any){
+    // console.log(this.orbit2d);
+    // this.lib3js.threeVars.renderer.getSize(this.rendererSize);
+    this.iMouse.setX(event.clientX-(this.lib3js.rendererSize.x/2));
+    this.iMouse.setY(-event.clientY+(this.lib3js.rendererSize.y/2));
+  }
+  onMouseWheel(event:any){
+    if(!this.ishud){
+      let zoomAmt = (event.deltaY + event.deltaX)/200;
+      zoomAmt = Math.exp(zoomAmt);
+      if(event.shiftKey)
+        zoomAmt *= 0.5;
+      else if(event.altKey)
+        zoomAmt *= 2.0;
+      
+      let scaleChange = this.orbit2d.z*zoomAmt - this.orbit2d.z;
 
-  onKeyDown(event: any) { 
-    if(event.ctrlKey){
-      if(event.key=='e')
-      {
+      let traX = this.orbit2d.z*(zoomAmt-1)*(this.iMouse.x); 
+      let traY = this.orbit2d.z*(zoomAmt-1)*(this.iMouse.y); 
+
+      this.orbit2d.setZ(this.orbit2d.z * zoomAmt);
+      this.orbit2d.setX(traX);
+      this.orbit2d.setY(traY);
+      
+      // console.log(this.orbit2d.z);
+    }
+  }
+  onKeyDown(event: any) {
+    if (event.ctrlKey) {
+      if (event.key == 'e') {
         event.preventDefault();
         console.log("toggle hud");
         this.ishud = !this.ishud;
       }
+      else if(event.key==' '){
+        event.preventDefault();
+        this.pause();
+      }
+      // console.log(event.key);
     }
-    
-    if(event.key=='`'){
+
+    if (event.key == '`') {
       this.toggleSettings();
       event.preventDefault();
       console.log(this.dialogRef);
     }
 
-    if(event.altKey){
-      if(event.key=='e')
-      {
+    if (event.altKey) {
+      if (event.key == 'e') {
         event.preventDefault();
         console.log("toggle hud");
         this.isDebuginfo = !this.isDebuginfo;
-      }
-      else if(event.key=='ArrowRight'){
-        if(this.tabSelected<1)
+      } else if (event.key == 'ArrowRight') {
+        if (this.tabSelected < 1)
           this.tabSelected++;
-      }
-      else if(event.key=='ArrowLeft'){
-        if(this.tabSelected>0)
+      } else if (event.key == 'ArrowLeft') {
+        if (this.tabSelected > 0)
           this.tabSelected--;
       }
     }
+
   }
-  private toggleSettings(){
-    if(!this.isConfigOpen){
+  public toggleSettings() {
+    if (!this.isConfigOpen) {
       let copiedState = Object.assign({}, this.state);
-      copiedState.program1 = 'bxas';
       this.dialogRef = this.dialog.open(settingsDialog, {
         width: '85vw',
         height: '85vh',
-        restoreFocus : true,
+        restoreFocus: true,
         data: copiedState
       });
-      this.dialogRef.afterClosed().subscribe((result:any) => {
-        console.log(result);
+      this.dialogRef.afterClosed().subscribe((result: any) => {
+        // console.log(result);
         this.isConfigOpen = false;
         this.validateResult(result);
       });
-      this.isConfigOpen=true;
-    }
-    else{
+      this.isConfigOpen = true;
+    } else {
       this.dialogRef.close();
       this.isConfigOpen = false;
     }
   }
-  private validateResult(result:any){
-    if(result){
+  private validateResult(result: any) {
+    console.log(result);
+    if (result) {
       this.state = result;
+      if(this.state.program1 != "")
+        this.prog1 = this.state.program1;
+      if(this.state.program2 != "")
+        this.prog2 = this.state.program2;
+      if(this.state.resolutionScale > 0.0){
+        this.lib3js.changeResScale(this.state.resolutionScale);
+      }
     }
   }
-  public uniformLabels : String[] = ['ShaderToy','bonzomatic','simpleV2']
+  public uniformLabels: String[] = ['ShaderToy', 'bonzomatic', 'simpleV2']
 }
 
 interface presets {
-    name : string;
-    desc : string;
-    code : string;
+  name: string;
+  desc: string;
+  code: string;
 }
 
 @Component({
@@ -324,76 +412,133 @@ interface presets {
   styleUrls: ['./css/settings.css'],
 })
 export class settingsDialog {
-  public preset1 : Array<presets> = [
-    {
-      name:"preset1",
-      desc:"desc",
-      code:"code1"
-    },    {
-      name:"preset2",
-      desc:"desc",
-      code:"code2"
-    },    {
-      name:"preset3",
-      desc:"desc",
-      code:"code3"
-    },    {
-      name:"preset4",
-      desc:"desc",
-      code:"code4"
+  public preset1: Array < presets > = [{
+      name: "Default Main Shader",
+      desc: "earth moves in circles",
+      code: 
+`precision mediump float;
+uniform float iTime;
+uniform vec2 iResolution;
+uniform vec2 iMouse; 
+varying vec3 fragCoord;
+vec3 image1(vec2 uv,vec2 center)
+{
+\tvec3 col = vec3(0.0);
+\tuv -= center;
+\tuv *= 5.;
+\tcol.r += smoothstep(2.0,0.1,fract(length(uv)+iTime));
+\tcol.g += smoothstep(abs(sin(iTime))+0.5,0.1,fract(length(uv)+iTime));
+\tcol.b += sin(length(uv*abs(sin(iTime))))*.2;
+\treturn col;
+}
+void main() {
+\tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+\tvec2 uvm = iMouse/iResolution;
+\tvec3 col = vec3(0.0);
+\tcol += image1(uv,vec2(0.,0.));
+\tcol.rg += abs(uvm);
+\tgl_FragColor=vec4(col*0.3,1.0);
+}`
+    }, {
+      name: "glslSandbox",
+      desc: "Deafult glslSandbox",
+      code: 
+`precision mediump float;
+uniform float iTime;
+uniform vec2 iResolution; 
+varying vec3 fragCoord;
+void main() {
+	vec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+    float color = 0.0;
+	color += sin( uv.x * cos( iTime / 15.0 ) * 80.0 ) + cos( uv.y * cos( iTime / 15.0 ) * 10.0 );
+	color += sin( uv.y * sin( iTime / 10.0 ) * 40.0 ) + cos( uv.x * sin( iTime / 25.0 ) * 40.0 );
+	color += sin( uv.x * sin( iTime / 5.0 ) * 10.0 ) + sin( uv.y * sin( iTime / 35.0 ) * 80.0 );
+	color *= sin( iTime / 10.0 ) * 0.5;
+
+	gl_FragColor = vec4( vec3( color, color * 0.5, sin( color + iTime / 3.0 ) * 0.75 ), 1.0 );
+
+}`
+    }, {
+      name: "preset3",
+      desc: "desc",
+      code: "code3"
+    }, {
+      name: "preset4",
+      desc: "desc",
+      code: "code4"
     },
     {
-      name:"preset5",
-      desc:"desc",
-      code:"code5"
+      name: "preset5",
+      desc: "desc",
+      code: "code5"
     },
     {
-      name:"preset6",
-      desc:"desc",
-      code:"code6"
+      name: "preset6",
+      desc: "desc",
+      code: "code6"
     },
   ];
-  public preset2 : Array<presets> = [
+  public preset2: Array < presets > = [
     {
-      name:"preset1",
-      desc:"desc",
-      code:"code1"
-    },    {
-      name:"preset2",
-      desc:"desc",
-      code:"code2"
-    },    {
-      name:"preset3",
-      desc:"desc",
-      code:"code3"
-    },    {
-      name:"preset4",
-      desc:"desc",
-      code:"code4"
+      name: "The Copy Shader",
+      desc: "hurrrr durrrr",
+      code:
+`uniform float opacity;
+uniform sampler2D tDiffuse;
+varying vec2 vUv;
+void main() {
+\tvec4 texel = texture2D( tDiffuse, vUv ) * opacity;
+\tgl_FragColor = texel;
+}`
+    }, 
+    {
+      name: "Gradient Overlay",
+      desc: "We all love that, beatiful and red",
+      code:
+`uniform float opacity;
+uniform sampler2D tDiffuse;
+varying vec2 vUv;
+void main() {
+\tvec4 texel = texture2D( tDiffuse, vUv ) * opacity;
+\tvec4 col = vec4(0.0);
+\tcol.r += vUv.x;
+\tcol.g += vUv.y;
+\tgl_FragColor = col*0.8 + .3*texel;
+}`
+    }, 
+    {
+      name: "preset3",
+      desc: "desc",
+      code: "code3"
+    }, 
+    {
+      name: "preset4",
+      desc: "desc",
+      code: "code4"
     },
     {
-      name:"preset5",
-      desc:"desc",
-      code:"code5"
+      name: "preset5",
+      desc: "desc",
+      code: "code5"
     },
     {
-      name:"preset6",
-      desc:"desc",
-      code:"code6"
+      name: "preset6",
+      desc: "desc",
+      code: "code6"
     },
   ];
-  
+
   constructor(
-    public dialogRef: MatDialogRef<settingsDialog>,
+    public dialogRef: MatDialogRef < settingsDialog > ,
     @Inject(MAT_DIALOG_DATA) public data: appState) {}
 
   onNoClick(): void {
     this.dialogRef.close();
   }
-  setProg1(prog1 : string):void{
+  setProg1(prog1: string): void {
     this.data.program1 = prog1;
   }
-  setProg2(prog2 : string):void{
+  setProg2(prog2: string): void {
     this.data.program2 = prog2;
   }
 }

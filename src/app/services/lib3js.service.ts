@@ -24,8 +24,16 @@ export class Lib3jsService {
   public threeVars : any = {};
   public compVars : any = {};
   public copyTemplate : any = CopyShader;
-
+  public rendererSize : THREE.Vector2 = new THREE.Vector2(0.0,0.0);
   public errorLog :any[] = []
+
+  private defaultUniforms : any = {
+    iTime: {type:"f",value: 1.0},
+    iResolution:{type:"vec2",value:new THREE.Vector2(0,0)},
+    iMouse:{type:"vec2",value:new THREE.Vector2(0,0)},
+    orbit2d:{type:"vec3",value:new THREE.Vector3(0,0,0)},
+  }
+
   constructor() {
     this.num_window = 0;
     this.config = {isPost:true};
@@ -61,12 +69,8 @@ export class Lib3jsService {
     
     //Other Things
     let geometry : THREE.Geometry = this.getBox();
-    let uniforms = {
-      iTime: {type:"f",value: 1.0},
-      iResolution:{type:"vec2",value:new THREE.Vector2(res_x,res_y)}
-    }
     let material : THREE.RawShaderMaterial =  new THREE.RawShaderMaterial({
-      uniforms: uniforms,
+      uniforms: this.defaultUniforms,
       fragmentShader: this.fs,
       vertexShader: this.vs,
     })
@@ -85,14 +89,19 @@ export class Lib3jsService {
     // composer.addPass(bloomPass);
     const customPass = new ShaderPass( this.copyTemplate );
     this.compVars = {"composer":composer,"customPass":customPass};
-    console.log(CopyShader);
+
+    this.threeVars.renderer.getSize(this.rendererSize);
   }
   public resizeRenderer(width:number,height:number){
     this.threeVars.camera.aspect = width / height;
     this.threeVars.camera.updateProjectionMatrix();
     this.threeVars.renderer.setSize(width,height);
+    this.threeVars.renderer.getSize(this.rendererSize);
   }
-  public renderToCanvas(time:number):void{
+  public changeResScale(res_scale:number): void{
+    this.compVars.composer.setPixelRatio(res_scale);
+  }
+  public renderToCanvas(time:number, iMouse : THREE.Vector2, orbit2d : THREE.Vector3):void{
     // console.log(this.threeVars.renderer);
 
     let res : THREE.Vector2 = new THREE.Vector2();
@@ -100,17 +109,20 @@ export class Lib3jsService {
     this.threeVars.material.uniforms.iResolution.value=res;
 
     this.threeVars.material.uniforms.iTime.value = time;
+
+    // console.log(iMouse.divide(res));
+    this.threeVars.material.uniforms.iMouse.value = iMouse;
+    this.threeVars.material.uniforms.orbit2d.value = orbit2d;
+
     this.compVars.composer.render();
+    // console.log(this.threeVars.composer);
     // this.threeVars.renderer.render(this.threeVars.scene, this.threeVars.camera);
   }
   public setShader(code1:string,code2:string):boolean{
-    let uniforms = {
-      iTime: {type:"f",value: 1.0},
-      iResolution:{type:"vec2",value:new THREE.Vector2(0,0)}
-    }
+
     
     let material : THREE.RawShaderMaterial =  new THREE.RawShaderMaterial({
-      uniforms: uniforms,
+      uniforms: this.defaultUniforms,
       fragmentShader: code1,
       vertexShader: this.vs,
     })
@@ -142,7 +154,8 @@ export class Lib3jsService {
   public fs:string = 
 `precision mediump float;
 uniform float iTime;
-uniform vec2 iResolution; 
+uniform vec2 iResolution;
+uniform vec2 iMouse;
 varying vec3 fragCoord;
 vec3 image1(vec2 uv,vec2 center)
 {
@@ -156,8 +169,10 @@ vec3 image1(vec2 uv,vec2 center)
 }
 void main() {
 \tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+\tvec2 uvm = iMouse/iResolution;
 \tvec3 col = vec3(0.0);
 \tcol += image1(uv,vec2(0.,0.));
+\tcol.rg += abs(uvm);
 \tgl_FragColor=vec4(col*0.3,1.0);
 }
 `

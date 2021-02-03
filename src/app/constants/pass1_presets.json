@@ -1,0 +1,9 @@
+{
+  "presets" : [
+    {
+      "name": "preset2",
+      "desc": "desc",
+      "code": "code1"
+    }
+  ]
+}

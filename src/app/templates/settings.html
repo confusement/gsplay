@@ -3,8 +3,15 @@
   <mat-card>
     <mat-card-title>What is this</mat-card-title>
     <mat-card-content>
-      <div>Hi, Here is what to do follow these steps</div>
-      <div>Never gonna give you up</div>
+      <div>Hi, why not try out different combinations of presets first, I'd be fun I said<br><br></div>
+      <div>Shader toy naming conventions used, refactoring ability may be added</div>
+      <div>=========================================</div>
+      <div>Shortcuts - </div>
+      <div><kbd>Ctrl + E</kbd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show/Hide Editor</div>
+      <div><kbd>Alt + arrows</kbd>&nbsp;- Switch</div>
+      <div><kbd>`</kbd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Open Settings</div>
+      <div><kbd>Ctrl + Space</kbd>&nbsp;- Pause Play</div>
+      <div>=========================================</div>
     </mat-card-content>
   </mat-card>
 
@@ -37,10 +44,15 @@
   <mat-card>
     <mat-card-title>Renderer Settings</mat-card-title>
     <mat-card-content>
-      <mat-form-field class="example-full-width">
-        <mat-label>Res Scale {{data.resolutionScale}}</mat-label>
-        <input matInput placeholder="Range in (0,1)" type="number" min="0.1" max="1.0" step="0.1" [(ngModel)]="data.resolutionScale">
-      </mat-form-field>
+      <div style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+        <span >Set Render Scale Factor (downscale for perfomance)</span>
+        <mat-slider min="0.1" max="1.0" step="0.1" [(ngModel)]="data.resolutionScale"></mat-slider>
+        <mat-form-field class="example-full-width">
+          <mat-label>Res Scale {{data.resolutionScale}}</mat-label>
+          <input matInput placeholder="Range in (0,1)" type="number" min="0.1" max="1.0" step="0.1" [(ngModel)]="data.resolutionScale">
+        </mat-form-field>
+      </div>
+
     </mat-card-content>
   </mat-card>
 

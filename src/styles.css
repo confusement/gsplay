@@ -44,7 +44,12 @@ body { margin: 0; font-family: Roboto, "Fira Sans", sans-serif; }
   visibility: hidden;
 }
 
-
+.mat-slider-thumb{
+  background-color: white !important;
+}
+.mat-slider-ticks-container{
+  background-color: white !important;
+}
 /*
   Name:       material
   Author:     Mattia Astorino (http://github.com/equinusocio)

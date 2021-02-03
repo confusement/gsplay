@@ -1,3 +1,4 @@
+// Source article - (Viktor Borisov) https://firstclassjs.com/persist-data-using-local-storage-and-angular/
 import { Injectable } from '@angular/core';
 
 @Injectable({

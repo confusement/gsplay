@@ -1,4 +1,4 @@
-<div class='main' (window:keydown)="onKeyDown($event)" (window:resize)="onResize($event)">
+<div class='main' (window:keydown)="onKeyDown($event)" (window:resize)="onResize($event)" (window:mousemove)="onMouseMove($event)" (window:wheel)="onMouseWheel($event)">
     <canvas id="canvas" #canvas></canvas>
     <!-- <div id="menu" [@hideMenu]="ishud ? 'open' : 'closed'">
         <button mat-button>A</button>
@@ -9,19 +9,29 @@
             <div class="textDisplay">fps : {{printVars["fps"]}}</div>
             <div class="textDisplay">time : {{printVars["time"]}}</div>
         </div> -->
+        <div id="toggleInfo" [@fadeEditor]="ishud ? 'open' : 'closed'">
+                <div class="controlbutton" (click)="toggleCode()">
+                    <mat-icon style="z-index: 2;">preview</mat-icon>
+            </div>
+        </div>
         <div id="showinf" [@fadeEditor]="!ishud && isDebuginfo? 'open' : 'closed'">
-                <div class="textDisplay">
-                    Shortcuts : alt+arrow-switch, ctrl+e-editor 
-                </div>
-            <div>
-                <div class="controlbutton">
-                    <mat-icon aria-hidden="false" aria-label="Example home icon">home</mat-icon>
-                </div>
-                <div class="controlbutton">
-                    <mat-icon aria-hidden="false" aria-label="Example home icon">home</mat-icon>
+            <div class="btgroup">
+                <div class="controlbutton" (click)="toggleSettings()">
+                    <mat-icon>settings</mat-icon>
                 </div>
             </div>
-            <div class="textDisplay" style="width: 30%;">
+            <div class="btgroup">
+                <div class="controlbutton" (click)="restart()">
+                    <mat-icon>restart_alt</mat-icon>
+                </div>
+                <div class="controlbutton" (click)="pause()">
+                    <mat-icon>{{pauseIcon}}</mat-icon>
+                </div>
+                <div class="controlbutton" (click)="toggleCode()">
+                    <mat-icon>code</mat-icon>
+                </div>
+            </div>
+            <div class="textDisplay" style="width: 15%;">
                 fps : {{printVars["fps"]}}
                 time : {{printVars["time"]}}
             </div>
@@ -30,24 +40,16 @@
 
         <div *ngIf="tabSelected==0" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div class="ngx-codemirror">
-                <ngx-codemirror
-                    [options]="options"
-                    [ngModel]="prog1"
-                    [autoFocus]="true"
-                    (ngModelChange)="handleChange($event,1)"
-                ></ngx-codemirror>
+                <ngx-codemirror [disabled]="!ishud" [options]="options" [ngModel]="prog1" [autoFocus]="true"
+                    (ngModelChange)="handleChange($event,1)"></ngx-codemirror>
             </div>
         </div>
         <textarea class="error1" readonly [@toggleConsole]="errPause? 'open' : 'closed'">{{errMsg}}</textarea>
         <div *ngIf="tabSelected==1" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div class="ngx-codemirror">
-                <ngx-codemirror
-                    [options]="options"
-                    [ngModel]="prog2"
-                    [autoFocus]="true"
-                    (ngModelChange)="handleChange($event,2)"
-                ></ngx-codemirror>
-                </div>
+                <ngx-codemirror [disabled]="!ishud" [options]="options" [ngModel]="prog2" [autoFocus]="true"
+                    (ngModelChange)="handleChange($event,2)"></ngx-codemirror>
+            </div>
         </div>
         <!-- <div *ngIf="tabSelected==2" id='innerdiv' [@fadeEditor]="ishud ? 'open' : 'closed'">
             <div id="configBox">
