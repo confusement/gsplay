@@ -1,10 +1,14 @@
-<h1 mat-dialog-title>GsPlay Editor</h1>
+<h1 mat-dialog-title>GsPlay Editor : Online Shader Editor</h1>
 <div mat-dialog-content>
   <mat-card>
     <mat-card-title>What is this</mat-card-title>
     <mat-card-content>
-      <div>Hi, why not try out different combinations of presets first, I'd be fun I said<br><br></div>
+      <div>Guide - start with presets and play with the code, for proper guide read/watch Inigo Quilez's tutorial and check out his website https://www.shadertoy.com/<br></div>
+      <div>Changes stored in local storage in browser, which is not not sent to any server.<br></div>
+      <div>Pause button does not freeze time, it stops continous render, i.e. renders one frame after a change is made<br></div>
+      <div>Auto Compile set to 1 sec intervals<br></div>
       <div>Shader toy naming conventions used, refactoring ability may be added</div>
+      <div>glhf<br></div>
       <div>=========================================</div>
       <div>Shortcuts - </div>
       <div><kbd>Ctrl + E</kbd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show/Hide Editor</div>
@@ -29,7 +33,7 @@
       </div>
 
       <div class="preset_blocks">
-        <div style="text-align: center;font-size: large;">Buffer 1</div>
+        <div style="text-align: center;font-size: large;">Second Pass</div>
         <mat-selection-list [multiple]="false" #pre2>
           <mat-list-option *ngFor="let p of preset2" (click)="setProg2(p.code)">
             {{p.name}}

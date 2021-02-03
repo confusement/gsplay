@@ -50,9 +50,11 @@ import * as THREE from 'three';
     trigger('fadeEditor', [
       state('open', style({
         opacity: 1,
+        "z-index" : 6,
       })),
       state('closed', style({
         opacity: 0.0,
+        "z-index" : -4,
       })),
       transition('open => closed', [
         animate('0.25s')
@@ -133,7 +135,7 @@ export class AppComponent implements OnInit {
     program2: ""
   };
   //Uniforms Code
-  public orbit2d : THREE.Vector3 = new THREE.Vector3(800,0,1);
+  public orbit2d : THREE.Vector3 = new THREE.Vector3(0,0,1);
   public iMouse : THREE.Vector2 = new THREE.Vector2(0.0,0.0);
   public dialogRef: any;
   //Code
@@ -162,7 +164,7 @@ export class AppComponent implements OnInit {
     let errLine = errString.split(":");
     let col = parseInt(errLine[1]);
     let row = parseInt(errLine[2]);
-    console.log(row, numLines, numError);
+    // console.log(row, numLines, numError);
     row = numLines - (numError - row);
     return "ERROR :" + col.toString() + ":" + row.toString() + ":" + (errLine.slice(3, errLine.length)).join() + "\n";
   }
@@ -175,12 +177,12 @@ export class AppComponent implements OnInit {
     let storageProg2 = this.local_storage.get('prog2');
     console.log();
     if (storageProg1 instanceof Object) {
-      this.prog1 = this.lib3js.fs;
+      this.prog1 = this.lib3js.fs1;
     } else {
       this.prog1 = storageProg1;
     }
     if (storageProg2 instanceof Object) {
-      this.prog2 = this.lib3js.copyTemplate.fragmentShader;
+      this.prog2 = this.lib3js.fs2;
     } else {
       this.prog2 = storageProg2;
     }
@@ -215,8 +217,8 @@ export class AppComponent implements OnInit {
         //   duration: 2000,
         // });
         // console.log(codes);
-        console.log(glErr)
-        console.log(glErr[2])
+        // console.log(glErr)
+        // console.log(glErr[2])
         let frommsg = glErr[7].split(/\r?\n/);
         let totalLinesCombined: number = parseInt(frommsg[frommsg.length - 1]);
         let fullError = "";
@@ -302,14 +304,36 @@ export class AppComponent implements OnInit {
     this.tabSelected = event.index;
     console.log(event.index);
   }
+  // public dragStart : THREE.Vector2 = new THREE.Vector2(0.0,0.);
+  public dragPrev : THREE.Vector2 = new THREE.Vector2(0.0,0.);
+  public isDragging : boolean = false;
+  public onMouseDown(event: any)
+  {
+    if(!this.ishud && !this.isConfigOpen)
+    {
+      this.dragPrev.copy(this.iMouse);
+      this.isDragging = true;
+    }
+  }
+  public onMouseUp(event: any)
+  {
+    if(!this.ishud && !this.isConfigOpen)
+    {
+      this.isDragging = false;
+    }
+  }
   onMouseMove(event:any){
-    // console.log(this.orbit2d);
-    // this.lib3js.threeVars.renderer.getSize(this.rendererSize);
-    this.iMouse.setX(event.clientX-(this.lib3js.rendererSize.x/2));
-    this.iMouse.setY(-event.clientY+(this.lib3js.rendererSize.y/2));
+    this.iMouse.set(event.clientX-(this.lib3js.rendererSize.x/2),-event.clientY+(this.lib3js.rendererSize.y/2));
+
+    if(this.isDragging && !this.ishud && !this.isConfigOpen){
+      this.orbit2d.setX( this.orbit2d.x + this.iMouse.x-this.dragPrev.x);
+      this.orbit2d.setY( this.orbit2d.y + this.iMouse.y-this.dragPrev.y);
+      this.dragPrev.copy(this.iMouse);
+      // console.log(this.orbit2d)
+    }
   }
   onMouseWheel(event:any){
-    if(!this.ishud){
+    if(!this.ishud && !this.isConfigOpen){
       let zoomAmt = (event.deltaY + event.deltaX)/200;
       zoomAmt = Math.exp(zoomAmt);
       if(event.shiftKey)
@@ -319,15 +343,26 @@ export class AppComponent implements OnInit {
       
       let scaleChange = this.orbit2d.z*zoomAmt - this.orbit2d.z;
 
-      let traX = this.orbit2d.z*(zoomAmt-1)*(this.iMouse.x); 
-      let traY = this.orbit2d.z*(zoomAmt-1)*(this.iMouse.y); 
-
+      // let traX = -this.orbit2d.z*(zoomAmt-1)*(this.iMouse.x) + this.orbit2d.x; 
+      // let traY = this.orbit2d.z*(zoomAmt-1)*(this.iMouse.y) + this.orbit2d.y; 
       this.orbit2d.setZ(this.orbit2d.z * zoomAmt);
-      this.orbit2d.setX(traX);
-      this.orbit2d.setY(traY);
+      // this.orbit2d.setX(traX);
+      // this.orbit2d.setY(traY);
       
       // console.log(this.orbit2d.z);
     }
+  }
+  onMouseDrag(event:any){
+    if(!this.ishud){
+      console.log(event);
+    }
+  }
+  resetZoom(){
+    this.orbit2d.setZ(1.0);
+  }
+  resetTranslate(){ 
+    this.orbit2d.setX(0.0); 
+    this.orbit2d.setY(0.0);
   }
   onKeyDown(event: any) {
     if (event.ctrlKey) {
@@ -420,6 +455,7 @@ export class settingsDialog {
 uniform float iTime;
 uniform vec2 iResolution;
 uniform vec2 iMouse; 
+uniform vec3 orbit2d; 
 varying vec3 fragCoord;
 vec3 image1(vec2 uv,vec2 center)
 {
@@ -432,8 +468,17 @@ vec3 image1(vec2 uv,vec2 center)
 \treturn col;
 }
 void main() {
+\t//transformations
 \tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
-\tvec2 uvm = iMouse/iResolution;
+\tfloat zoom = orbit2d.z;
+\tvec2 translate = (orbit2d.xy / (iResolution*.5) ) * zoom;
+\ttranslate.x *= iResolution.x/iResolution.y; 
+\tvec2 uvm = iMouse/(iResolution*.5); 
+\tuvm.x *= iResolution.x/iResolution.y;
+\t//Translate pixel position
+\tuv *= zoom;
+\tuv -= translate;
+\t//Your Program
 \tvec3 col = vec3(0.0);
 \tcol += image1(uv,vec2(0.,0.));
 \tcol.rg += abs(uvm);
@@ -441,22 +486,32 @@ void main() {
 }`
     }, {
       name: "glslSandbox",
-      desc: "Deafult glslSandbox",
+      desc: "Deafult glslSandbox template",
       code: 
 `precision mediump float;
 uniform float iTime;
 uniform vec2 iResolution; 
+uniform vec2 iMouse; 
+uniform vec3 orbit2d; 
 varying vec3 fragCoord;
 void main() {
-	vec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
-    float color = 0.0;
-	color += sin( uv.x * cos( iTime / 15.0 ) * 80.0 ) + cos( uv.y * cos( iTime / 15.0 ) * 10.0 );
-	color += sin( uv.y * sin( iTime / 10.0 ) * 40.0 ) + cos( uv.x * sin( iTime / 25.0 ) * 40.0 );
-	color += sin( uv.x * sin( iTime / 5.0 ) * 10.0 ) + sin( uv.y * sin( iTime / 35.0 ) * 80.0 );
-	color *= sin( iTime / 10.0 ) * 0.5;
-
-	gl_FragColor = vec4( vec3( color, color * 0.5, sin( color + iTime / 3.0 ) * 0.75 ), 1.0 );
-
+\t//transformations
+\tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+\tfloat zoom = orbit2d.z;
+\tvec2 translate = (orbit2d.xy / (iResolution*.5) ) * zoom;
+\ttranslate.x *= iResolution.x/iResolution.y; 
+\tvec2 uvm = iMouse/(iResolution*.5); 
+\tuvm.x *= iResolution.x/iResolution.y;
+\t//Translate pixel position
+\tuv *= zoom;
+\tuv -= translate;
+\t//Your Program
+\tfloat color = 0.0;
+\tcolor += sin( uv.x * cos( iTime / 15.0 ) * 80.0 ) + cos( uv.y * cos( iTime / 15.0 ) * 10.0 );
+\tcolor += sin( uv.y * sin( iTime / 10.0 ) * 40.0 ) + cos( uv.x * sin( iTime / 25.0 ) * 40.0 );
+\tcolor += sin( uv.x * sin( iTime / 5.0 ) * 10.0 ) + sin( uv.y * sin( iTime / 35.0 ) * 80.0 );
+\tcolor *= sin( iTime / 10.0 ) * 0.5;
+\tgl_FragColor = vec4( vec3( color, color * 0.5, sin( color + iTime / 3.0 ) * 0.75 ), 1.0 );
 }`
     }, {
       name: "preset3",
@@ -493,7 +548,7 @@ void main() {
     }, 
     {
       name: "Gradient Overlay",
-      desc: "We all love that, beatiful and red",
+      desc: "Makes anything look good, even the circles",
       code:
 `uniform float opacity;
 uniform sampler2D tDiffuse;

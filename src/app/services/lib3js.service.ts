@@ -71,7 +71,7 @@ export class Lib3jsService {
     let geometry : THREE.Geometry = this.getBox();
     let material : THREE.RawShaderMaterial =  new THREE.RawShaderMaterial({
       uniforms: this.defaultUniforms,
-      fragmentShader: this.fs,
+      fragmentShader: this.fs1,
       vertexShader: this.vs,
     })
     let scene: THREE.Scene = new THREE.Scene();
@@ -151,11 +151,23 @@ export class Lib3jsService {
       gl_Position = vec4(position.xyz,1.0);
   }
   `
-  public fs:string = 
+  public fs2:string = 
+  `uniform float opacity;
+uniform sampler2D tDiffuse;
+varying vec2 vUv;
+void main() {
+\tvec4 texel = texture2D( tDiffuse, vUv ) * opacity;
+\tvec4 col = vec4(0.0);
+\tcol.r += vUv.x;
+\tcol.g += vUv.y;
+\tgl_FragColor = col*0.8 + .3*texel;
+}`;
+  public fs1:string = 
 `precision mediump float;
 uniform float iTime;
 uniform vec2 iResolution;
-uniform vec2 iMouse;
+uniform vec2 iMouse; 
+uniform vec3 orbit2d; 
 varying vec3 fragCoord;
 vec3 image1(vec2 uv,vec2 center)
 {
@@ -168,12 +180,20 @@ vec3 image1(vec2 uv,vec2 center)
 \treturn col;
 }
 void main() {
+\t//transformations
 \tvec2 uv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
-\tvec2 uvm = iMouse/iResolution;
+\tfloat zoom = orbit2d.z;
+\tvec2 translate = (orbit2d.xy / (iResolution*.5) ) * zoom;
+\ttranslate.x *= iResolution.x/iResolution.y; 
+\tvec2 uvm = iMouse/(iResolution*.5); 
+\tuvm.x *= iResolution.x/iResolution.y;
+\t//Translate pixel position
+\tuv *= zoom;
+\tuv -= translate;
+\t//Your Program
 \tvec3 col = vec3(0.0);
 \tcol += image1(uv,vec2(0.,0.));
 \tcol.rg += abs(uvm);
 \tgl_FragColor=vec4(col*0.3,1.0);
-}
-`
+}`;
 }

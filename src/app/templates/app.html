@@ -1,39 +1,59 @@
-<div class='main' (window:keydown)="onKeyDown($event)" (window:resize)="onResize($event)" (window:mousemove)="onMouseMove($event)" (window:wheel)="onMouseWheel($event)">
+<div class='main' 
+    (window:keydown)="onKeyDown($event)"
+    (window:resize)="onResize($event)" 
+    (window:mousemove)="onMouseMove($event)" 
+    (window:wheel)="onMouseWheel($event)"
+    (window:mousedown)="onMouseDown($event)"
+    (window:mouseup)="onMouseUp($event)">
     <canvas id="canvas" #canvas></canvas>
-    <!-- <div id="menu" [@hideMenu]="ishud ? 'open' : 'closed'">
-        <button mat-button>A</button>
-        <button mat-button>B</button>   
-    </div> -->
+
     <div class='workingarea'>
-        <!-- <div id="showVars" [@fadeEditor]="!ishud && isDebuginfo? 'open' : 'closed'">
-            <div class="textDisplay">fps : {{printVars["fps"]}}</div>
-            <div class="textDisplay">time : {{printVars["time"]}}</div>
-        </div> -->
+
         <div id="toggleInfo" [@fadeEditor]="ishud ? 'open' : 'closed'">
-                <div class="controlbutton" (click)="toggleCode()">
-                    <mat-icon style="z-index: 2;">preview</mat-icon>
+            <div class="controlbutton" (click)="toggleCode()">
+                    <mat-icon style="z-index: 2;">code_off</mat-icon>
+            </div>
+            <div class="controlbutton" (click)="toggleSettings()">
+                <mat-icon >settings</mat-icon>
             </div>
         </div>
         <div id="showinf" [@fadeEditor]="!ishud && isDebuginfo? 'open' : 'closed'">
-            <div class="btgroup">
-                <div class="controlbutton" (click)="toggleSettings()">
-                    <mat-icon>settings</mat-icon>
-                </div>
+
+            <div class="textDisplay" style="width: 10%;">
+                fps : {{printVars["fps"] | number : '1.1-1'}}
+                time : {{printVars["time"] | number : '1.1-1'}}
             </div>
+
             <div class="btgroup">
-                <div class="controlbutton" (click)="restart()">
+                <div matTooltip="restart" class="controlbutton" (click)="restart()">
                     <mat-icon>restart_alt</mat-icon>
                 </div>
-                <div class="controlbutton" (click)="pause()">
+                <div matTooltip="pasue" class="controlbutton" (click)="pause()">
                     <mat-icon>{{pauseIcon}}</mat-icon>
                 </div>
-                <div class="controlbutton" (click)="toggleCode()">
+                <div matTooltip="Show editor" class="controlbutton" (click)="toggleCode()">
                     <mat-icon>code</mat-icon>
                 </div>
             </div>
-            <div class="textDisplay" style="width: 15%;">
-                fps : {{printVars["fps"]}}
-                time : {{printVars["time"]}}
+
+
+            <div style="display: flex;flex-direction: row; align-items: center;">
+                <div class="textDisplay">
+                    Zoom level : {{orbit2d.z | number : '1.2-2'}}
+                </div>
+                <div class="btgroup">
+
+                    <div matTooltip="Reset Zoom" class="controlbutton" (click)="resetZoom()">
+                        <mat-icon>search_off</mat-icon>
+                    </div>
+                    <div matTooltip="Reset offset" class="controlbutton" (click)="resetTranslate()">
+                        <mat-icon>do_not_touch</mat-icon>
+                    </div>
+                    <div matTooltip="Open Settings" class="controlbutton" (click)="toggleSettings()">
+                        <mat-icon>settings</mat-icon>
+                    </div>
+                </div>
+
             </div>
 
         </div>

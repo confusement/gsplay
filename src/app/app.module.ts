@@ -26,6 +26,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatListModule} from '@angular/material/list';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 //My Components
 import { GwindowComponent } from './components/gwindow/gwindow.component';
@@ -58,7 +59,8 @@ import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-sou
     MatSnackBarModule,
     CodemirrorModule,
     MatButtonToggleModule,
-    MatListModule
+    MatListModule,
+    MatTooltipModule
   ],
   providers: [],
   bootstrap: [AppComponent]
