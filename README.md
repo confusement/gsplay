@@ -1,8 +1,9 @@
 # Gsplay
-
-# gsplay 
-- Implentation of online 2D fragment shader editor, much like shadertoy using threejs and angular
+- Implentation of online 2D fragment shader editor, much like shadertoy using threejs and angular (angular learning self project)
 - Additional features added apart from regular shaderToy - orbit controls, dynamic resolution, separate post process shader.
+- WIP - 3d examples using raymarch and 3d orbit contols.
+- if you have stumbled upon by chance and you are not someone I know, please give feedback if I should develop it further. (e.g. Adding cloud storage)
+- local storage used for storing changes in code, can be cleared by using dev console and clear all data.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.0.5.
 
