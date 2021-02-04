@@ -110,6 +110,9 @@ export class AppComponent implements OnInit {
   public pauseIcon: string = "pause";
   public userPause: boolean = false;
   public singleFrameRendered: boolean = false;
+
+  //Loading UI
+  public isLoading : boolean = true;
   //Renderer Vars
   public tStart: number = 0;
   public tPause: number = 0;
@@ -136,6 +139,7 @@ export class AppComponent implements OnInit {
   };
   //Uniforms Code
   public orbit2d : THREE.Vector3 = new THREE.Vector3(0,0,1);
+  public orbit3d : THREE.Vector4 = new THREE.Vector4(0,0,0,1);
   public iMouse : THREE.Vector2 = new THREE.Vector2(0.0,0.0);
   public dialogRef: any;
   //Code
@@ -166,11 +170,15 @@ export class AppComponent implements OnInit {
     let row = parseInt(errLine[2]);
     // console.log(row, numLines, numError);
     row = numLines - (numError - row);
-    return "ERROR :" + col.toString() + ":" + row.toString() + ":" + (errLine.slice(3, errLine.length)).join() + "\n";
+    console.log(errString,row,col);
+    if(!isNaN(row) && !isNaN(col))
+      return "ERROR :" + col.toString() + ":" + row.toString() + ":" + (errLine.slice(3, errLine.length)).join() + "\n";
+    else
+      return errString + "\n";
   }
   @ViewChildren('.') public codes: any;
   public ngAfterViewInit(): void {
-    console.log(this.codes);
+    // console.log(this.codes);
     // this.code.first.setCode(this.lib3js.fs);
 
     let storageProg1 = this.local_storage.get('prog1');
@@ -192,7 +200,7 @@ export class AppComponent implements OnInit {
     console.log(canElement.height, canElement.width, "viewInit Size");
     this.lib3js.createRenderer(this.canvasRef);
     this.Render();
-
+    this.isLoading = false;
     // this.toggleSettings();
   }
   Render = () => {
@@ -346,6 +354,7 @@ export class AppComponent implements OnInit {
       // let traX = -this.orbit2d.z*(zoomAmt-1)*(this.iMouse.x) + this.orbit2d.x; 
       // let traY = this.orbit2d.z*(zoomAmt-1)*(this.iMouse.y) + this.orbit2d.y; 
       this.orbit2d.setZ(this.orbit2d.z * zoomAmt);
+      this.orbit3d.setZ(this.orbit3d.z * zoomAmt)
       // this.orbit2d.setX(traX);
       // this.orbit2d.setY(traY);
       
@@ -514,9 +523,91 @@ void main() {
 \tgl_FragColor = vec4( vec3( color, color * 0.5, sin( color + iTime / 3.0 ) * 0.75 ), 1.0 );
 }`
     }, {
-      name: "preset3",
-      desc: "desc",
-      code: "code3"
+      name: "Basic Ray March",
+      desc: "Normals Shaded on geometry by default, camera setup - ray origin, destination and fov",
+      code: 
+`precision mediump float;
+uniform float iTime;
+uniform vec2 iResolution;
+uniform vec2 iMouse; 
+varying vec3 fragCoord;
+#define STEPS 50
+#define NEAR_CLIP 1.
+#define FAR_CLIP 100.0
+#define EPSILON 0.1
+  
+float SDF(vec3 pos);
+vec3 SDFNormal(vec3 pos);
+vec3 getrayDirection(vec3 ro, vec3 target, vec2 uv);
+vec2 uv = vec2(0.0);
+vec2 uvm = vec2(0.0);
+float march(vec3 ro, vec3 rd)
+{
+\tfloat ds = 0.0;
+\tfor(int i=0;i<STEPS;i++)
+\t{
+\t\tvec3 po = ro + rd*ds;
+\t\tfloat newDist = SDF(po);
+\t\tds += newDist;    
+\t\tif(abs(ds)<NEAR_CLIP)
+\t\t\treturn ds;
+\t\tif(ds>FAR_CLIP)
+\t\t\tbreak;
+\t}
+\treturn ds;
+}
+vec3 getrayDirection(vec3 ro, vec3 target, vec2 uv){
+\tvec3 viewDir = normalize(target-ro);
+\tvec3 right = normalize(cross(viewDir,vec3(0.,0.,1.)));
+\tvec3 up = cross(right,viewDir);
+\tvec3 rd = viewDir + uv.x*right + uv.y*up;
+\treturn rd;
+}
+vec3 SDFNormal(vec3 pos){
+\tfloat dx = SDF(vec3(pos.x+EPSILON,pos.y,pos.z)) - SDF(vec3(pos.x-EPSILON,pos.y,pos.z));
+\tfloat dy = SDF(vec3(pos.x,pos.y+EPSILON,pos.z)) - SDF(vec3(pos.x,pos.y-EPSILON,pos.z));
+\tfloat dz = SDF(vec3(pos.x,pos.y,pos.z+EPSILON)) - SDF(vec3(pos.x,pos.y,pos.z-EPSILON));
+\tvec3 norm = normalize(vec3(dx,dy,dz));
+\treturn norm;
+}
+float SDF(vec3 pos){
+\treturn length(pos) - 1.0+sin(abs(uv.x*uv.y))*1.;
+}
+void main() {
+\t//transformations
+\tuv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
+\tuvm = iMouse/(iResolution*.5); 
+\tuvm.x *= iResolution.x/iResolution.y;
+\t//Your Program
+\tvec3 col = vec3(0.0);
+\t// CAMERA SETUP
+
+\tfloat radius = 10.;
+\tvec3 ro = vec3(sin(iTime),cos(iTime),2.);
+\tvec3 target = vec3(0.,0.,0.);	
+\tvec3 rd = getrayDirection(ro,target,uv);
+\t// RAY MARCH START
+\tfloat distance = march(ro,rd);
+
+\tif(distance > FAR_CLIP)
+\t{
+\t\tgl_FragColor = vec4(col,1.);
+\t\treturn;
+\t}
+\tvec3 surfacePoint = ro+rd*distance;
+\tvec3 normal = SDFNormal(surfacePoint);
+  
+\t//LIGHTING
+\tvec3 lightPos = vec3(3.,2.,4.);
+
+\tcol = dot(lightPos-surfacePoint,normal) * vec3(0.2,0.4,0.6);
+\tcol = max(col,vec3(0.));
+\t//col += vec3(0.1);
+
+\tcol = normal+vec3(0.8);
+\tgl_FragColor=vec4(col,1.0);
+}
+`
     }, {
       name: "preset4",
       desc: "desc",

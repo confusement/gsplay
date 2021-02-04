@@ -192,8 +192,6 @@ void main() {
 \tuv -= translate;
 \t//Your Program
 \tvec3 col = vec3(0.0);
-\tcol += image1(uv,vec2(0.,0.));
-\tcol.rg += abs(uvm);
-\tgl_FragColor=vec4(col*0.3,1.0);
+\tgl_FragColor=vec4(col,1.0);
 }`;
 }

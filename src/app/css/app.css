@@ -55,11 +55,11 @@
     font-size: medium;
 }
 .error1{
-    height: 20vh;
-    width: 60%;
+    height: 60vh;
+    width: 40%;
     position: absolute;
-    bottom: 1%;
-    left: 30%;
+    top: 5%;
+    right: 5%;
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
@@ -158,4 +158,7 @@ mat-grid-tile {
 .textDisplay{
     text-align: center;
     padding: 15px;
+}
+circle{
+    stroke: white;
 }

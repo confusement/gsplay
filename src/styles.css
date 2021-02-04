@@ -50,6 +50,9 @@ body { margin: 0; font-family: Roboto, "Fira Sans", sans-serif; }
 .mat-slider-ticks-container{
   background-color: white !important;
 }
+.mat-progress-spinner circle, .mat-spinner circle{
+    stroke: white;
+}
 /*
   Name:       material
   Author:     Mattia Astorino (http://github.com/equinusocio)

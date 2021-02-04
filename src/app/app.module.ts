@@ -27,7 +27,7 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatListModule} from '@angular/material/list';
 import {MatTooltipModule} from '@angular/material/tooltip';
-
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 //My Components
 import { GwindowComponent } from './components/gwindow/gwindow.component';
 import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-source-editor.component';
@@ -60,7 +60,8 @@ import { NgxSourceEditorComponent } from './components/ngx-source-editor/ngx-sou
     CodemirrorModule,
     MatButtonToggleModule,
     MatListModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
