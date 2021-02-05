@@ -42,6 +42,7 @@ export interface appState {
   program2: string;
 }
 import * as THREE from 'three';
+import { MatHint } from '@angular/material/form-field';
 @Component({
   selector: 'app-root',
   templateUrl: './templates/app.html',
@@ -112,7 +113,8 @@ export class AppComponent implements OnInit {
   public singleFrameRendered: boolean = false;
 
   //Loading UI
-  public isLoading : boolean = true;
+  public isLoading : boolean = true; //In case of large compile time by threejs
+
   //Renderer Vars
   public tStart: number = 0;
   public tPause: number = 0;
@@ -131,6 +133,7 @@ export class AppComponent implements OnInit {
 
   //Settings
   public isConfigOpen: boolean = false;
+  // App state copied to config and the result appState validated for any inconsistencies
   public state: appState = {
     resolutionScale: 1,
     editorSelection: 0,
@@ -138,9 +141,10 @@ export class AppComponent implements OnInit {
     program2: ""
   };
   //Uniforms Code
-  public orbit2d : THREE.Vector3 = new THREE.Vector3(0,0,1);
-  public orbit3d : THREE.Vector4 = new THREE.Vector4(0,0,0,1);
-  public iMouse : THREE.Vector2 = new THREE.Vector2(0.0,0.0);
+  public orbit2d : THREE.Vector3 = new THREE.Vector3(0,0,3);
+  public orbit3d : THREE.Vector3 = new THREE.Vector3(0,0,0);
+  public rotationAngles : THREE.Vector2 = new THREE.Vector2(0.75,1.07); //In radians, for parametric equation of sphere, radius is fixed 1
+  public iMouse : THREE.Vector2 = new THREE.Vector2(0.0,0.0); // Range of values, X: -width/2 to width/2 and similarily for height
   public dialogRef: any;
   //Code
   prog1: string = "let first : string = \"henlo\"";
@@ -164,6 +168,7 @@ export class AppComponent implements OnInit {
     canElement.width = canElement.clientWidth;
     this.lib3js.resizeRenderer(window.innerWidth, window.innerHeight);
   }
+  // Convert Line numbers to position in the editor screen
   private formatError(errString: string, numLines: number, numError: number): string {
     let errLine = errString.split(":");
     let col = parseInt(errLine[1]);
@@ -178,8 +183,6 @@ export class AppComponent implements OnInit {
   }
   @ViewChildren('.') public codes: any;
   public ngAfterViewInit(): void {
-    // console.log(this.codes);
-    // this.code.first.setCode(this.lib3js.fs);
 
     let storageProg1 = this.local_storage.get('prog1');
     let storageProg2 = this.local_storage.get('prog2');
@@ -201,19 +204,16 @@ export class AppComponent implements OnInit {
     this.lib3js.createRenderer(this.canvasRef);
     this.Render();
     this.isLoading = false;
-    // this.toggleSettings();
   }
   Render = () => {
-    // console.log("rendering");
     requestAnimationFrame(this.Render);
-    // console.log(this.tStart);
     if (!this.errPause && !(this.userPause && this.singleFrameRendered)) {
       let pfNow = performance.now();
       this.printVars.fps = (1000 / (pfNow - this.lastFrame)).toFixed(1);
       this.lastFrame = pfNow;
 
       this.printVars.time = ((pfNow - this.tStart) / 1000).toFixed(1);
-      this.lib3js.renderToCanvas((pfNow - this.tStart) / 1000,this.iMouse,this.orbit2d);
+      this.lib3js.renderToCanvas((pfNow - this.tStart) / 1000,this.iMouse,this.orbit2d,this.orbit3d);
       this.singleFrameRendered = true;
     }
 
@@ -224,9 +224,6 @@ export class AppComponent implements OnInit {
         // this._snackBar.open("error occured", "dismiss", {
         //   duration: 2000,
         // });
-        // console.log(codes);
-        // console.log(glErr)
-        // console.log(glErr[2])
         let frommsg = glErr[7].split(/\r?\n/);
         let totalLinesCombined: number = parseInt(frommsg[frommsg.length - 1]);
         let fullError = "";
@@ -253,12 +250,15 @@ export class AppComponent implements OnInit {
 
   }
   ngOnInit() {
-    // console.log(this.local_storage.get('prog1'));a
+    this.orbit3d.setX(Math.cos(this.rotationAngles.x)*Math.sin(this.rotationAngles.y));
+    this.orbit3d.setY(Math.sin(this.rotationAngles.x)*Math.sin(this.rotationAngles.y));
+    this.orbit3d.setX(Math.cos(this.rotationAngles.x)*Math.sin(this.rotationAngles.y));
+    this.orbit3d.setY(Math.sin(this.rotationAngles.x)*Math.sin(this.rotationAngles.y));
+    this.orbit3d.setZ(Math.cos(this.rotationAngles.y));
   }
   public errMsg: string = "Everything good here too yoooooo";
   sub = interval(1000).subscribe((val) => {
     if (this.prog1_prev != this.prog1 || this.prog2_prev != this.prog2) {
-      // console.log("GG")
       this.local_storage.set('prog1', this.prog1);
       this.local_storage.set('prog2', this.prog2);
       this.lib3js.setShader(this.prog1, this.prog2);
@@ -312,12 +312,12 @@ export class AppComponent implements OnInit {
     this.tabSelected = event.index;
     console.log(event.index);
   }
-  // public dragStart : THREE.Vector2 = new THREE.Vector2(0.0,0.);
+
   public dragPrev : THREE.Vector2 = new THREE.Vector2(0.0,0.);
   public isDragging : boolean = false;
   public onMouseDown(event: any)
   {
-    if(!this.ishud && !this.isConfigOpen)
+    if(!this.ishud && !this.isConfigOpen && !this.userPause)
     {
       this.dragPrev.copy(this.iMouse);
       this.isDragging = true;
@@ -325,7 +325,7 @@ export class AppComponent implements OnInit {
   }
   public onMouseUp(event: any)
   {
-    if(!this.ishud && !this.isConfigOpen)
+    if(!this.ishud && !this.isConfigOpen && !this.userPause)
     {
       this.isDragging = false;
     }
@@ -334,10 +334,30 @@ export class AppComponent implements OnInit {
     this.iMouse.set(event.clientX-(this.lib3js.rendererSize.x/2),-event.clientY+(this.lib3js.rendererSize.y/2));
 
     if(this.isDragging && !this.ishud && !this.isConfigOpen){
-      this.orbit2d.setX( this.orbit2d.x + this.iMouse.x-this.dragPrev.x);
-      this.orbit2d.setY( this.orbit2d.y + this.iMouse.y-this.dragPrev.y);
+      let deltaX = this.iMouse.x-this.dragPrev.x;
+      let deltaY = this.iMouse.y-this.dragPrev.y;
+
+      this.orbit2d.setX( this.orbit2d.x + deltaX);
+      this.orbit2d.setY( this.orbit2d.y + deltaY);
+      // console.log(deltaX,deltaY);
+      
+      this.rotationAngles.setX(this.rotationAngles.x - deltaX*0.01);
+      this.rotationAngles.setY(this.rotationAngles.y + deltaY*0.01);
+
+      if(this.rotationAngles.x > 2*Math.PI)
+        this.rotationAngles.setX(this.rotationAngles.x % 2*Math.PI);
+      if(this.rotationAngles.y > Math.PI)
+        this.rotationAngles.setY(Math.PI);
+      else if(this.rotationAngles.y <0.1)
+      this.rotationAngles.setY(0.1);
+
+      this.orbit3d.setX(Math.cos(this.rotationAngles.x)*Math.sin(this.rotationAngles.y));
+      this.orbit3d.setY(Math.sin(this.rotationAngles.x)*Math.sin(this.rotationAngles.y));
+      this.orbit3d.setZ(Math.cos(this.rotationAngles.y));
+
+      // console.log(this.rotationAngles);
       this.dragPrev.copy(this.iMouse);
-      // console.log(this.orbit2d)
+
     }
   }
   onMouseWheel(event:any){
@@ -350,9 +370,9 @@ export class AppComponent implements OnInit {
         zoomAmt *= 2.0;
       
       let scaleChange = this.orbit2d.z*zoomAmt - this.orbit2d.z;
-
-      // let traX = -this.orbit2d.z*(zoomAmt-1)*(this.iMouse.x) + this.orbit2d.x; 
-      // let traY = this.orbit2d.z*(zoomAmt-1)*(this.iMouse.y) + this.orbit2d.y; 
+      //Localized zoom, not working :(
+      let traX = -this.orbit2d.z*(zoomAmt-1)*(this.iMouse.x) + this.orbit2d.x; 
+      let traY = this.orbit2d.z*(zoomAmt-1)*(this.iMouse.y) + this.orbit2d.y; 
       this.orbit2d.setZ(this.orbit2d.z * zoomAmt);
       this.orbit3d.setZ(this.orbit3d.z * zoomAmt)
       // this.orbit2d.setX(traX);
@@ -529,12 +549,14 @@ void main() {
 `precision mediump float;
 uniform float iTime;
 uniform vec2 iResolution;
+uniform vec3 orbit3d; 
+uniform vec3 orbit2d; 
 uniform vec2 iMouse; 
 varying vec3 fragCoord;
 #define STEPS 50
 #define NEAR_CLIP 1.
 #define FAR_CLIP 100.0
-#define EPSILON 0.1
+#define EPSILON 0.2
   
 float SDF(vec3 pos);
 vec3 SDFNormal(vec3 pos);
@@ -578,12 +600,13 @@ void main() {
 \tuv = vec2(fragCoord.x*iResolution.x/iResolution.y,fragCoord.y);
 \tuvm = iMouse/(iResolution*.5); 
 \tuvm.x *= iResolution.x/iResolution.y;
+\tvec3 camera = orbit3d.xyz * orbit2d.z;
 \t//Your Program
 \tvec3 col = vec3(0.0);
 \t// CAMERA SETUP
 
 \tfloat radius = 10.;
-\tvec3 ro = vec3(sin(iTime),cos(iTime),2.);
+\tvec3 ro = camera;
 \tvec3 target = vec3(0.,0.,0.);	
 \tvec3 rd = getrayDirection(ro,target,uv);
 \t// RAY MARCH START

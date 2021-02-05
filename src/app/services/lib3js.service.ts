@@ -32,6 +32,7 @@ export class Lib3jsService {
     iResolution:{type:"vec2",value:new THREE.Vector2(0,0)},
     iMouse:{type:"vec2",value:new THREE.Vector2(0,0)},
     orbit2d:{type:"vec3",value:new THREE.Vector3(0,0,0)},
+    orbit3d:{type:"vec3",value:new THREE.Vector4(0,0,0)},
   }
 
   constructor() {
@@ -101,7 +102,7 @@ export class Lib3jsService {
   public changeResScale(res_scale:number): void{
     this.compVars.composer.setPixelRatio(res_scale);
   }
-  public renderToCanvas(time:number, iMouse : THREE.Vector2, orbit2d : THREE.Vector3):void{
+  public renderToCanvas(time:number, iMouse : THREE.Vector2, orbit2d : THREE.Vector3, orbit3d : THREE.Vector3):void{
     // console.log(this.threeVars.renderer);
 
     let res : THREE.Vector2 = new THREE.Vector2();
@@ -113,6 +114,7 @@ export class Lib3jsService {
     // console.log(iMouse.divide(res));
     this.threeVars.material.uniforms.iMouse.value = iMouse;
     this.threeVars.material.uniforms.orbit2d.value = orbit2d;
+    this.threeVars.material.uniforms.orbit3d.value = orbit3d;
 
     this.compVars.composer.render();
     // console.log(this.threeVars.composer);
